@@ -48,7 +48,7 @@ button,input{font:inherit;color:inherit;background:#0d2635;border:1px solid #3c6
  };
  input.addEventListener('keydown',event=>{if(event.key==='Enter')generate.click();});
  const names={'Base':'Main capsule','Player':'Starting position','Cache 1':'Solar cache','Cache 2':'Repair cache','Cache 3':'Power cache','Suit pod':'Spacesuit pod','Research':'Research capsule','Mining cache':'Mining cache','Future impact':'Future impact','Impact site':'Impact site','Tunnel 1':'Pass · west','Tunnel 2':'Pass · east','Enemy':'Enemy','Narrow pass':'Mountain pass','Danger sign':'DANGER sign','Skeleton':'Skeleton','Crash module':'Crashed module','Module chest':'Module chest','Module record':'Module record'};
- const groups=[['Enemies · 3 × 100 HP','var(--red)','Enemy'],['Locations','var(--foreground)',null],['Iron · 16 fields','var(--viz-series-1)','Iron'],['Bronze · 16 fields','var(--viz-series-2)','Bronze'],['Glass · 96 pieces','var(--viz-series-3)','Glass'],['Hydrite · 576','var(--viz-series-4)','Hydrite'],['Verdite · 576','var(--viz-series-5)','Verdite'],['Vitraleaf · 48 + 144 plants','var(--green)','Vitraleaf'],['Asterium · 16 fields','var(--purple)','Asterium'],['Vesperite · 16 fields','var(--yellow)','Vesperite']];
+ const groups=[['Enemies · 3 × 100 HP','var(--red)','Enemy'],['Locations','var(--foreground)',null],['Iron · 32 fields','var(--viz-series-1)','Iron'],['Bronze · 32 fields','var(--viz-series-2)','Bronze'],['Glass · 192 pieces','var(--viz-series-3)','Glass'],['Hydrite · 1152','var(--viz-series-4)','Hydrite'],['Verdite · 1152','var(--viz-series-5)','Verdite'],['Vitraleaf · 96 + 288 plants','var(--green)','Vitraleaf'],['Asterium · 32 fields','var(--purple)','Asterium'],['Vesperite · 32 fields','var(--yellow)','Vesperite']];
  for(const [label,color] of groups){const e=document.createElement('span');e.className='text-small';const dot=document.createElement('i');dot.style.setProperty('--mark',color);if(label.startsWith('Iron')||label.startsWith('Bronze'))dot.style.borderRadius='0';if(label.startsWith('Glass')){dot.style.borderRadius='0';dot.style.transform='rotate(45deg)';}if(label==='Locations')dot.style.clipPath='polygon(50% 0,100% 100%,0 100%)';e.append(dot,document.createTextNode(label));root.querySelector('.hp-legend').append(e);}
  let cx=2000,cy=0,half=4800,w=700,h=590,selected=null,drag=null,moved=false;
  const make=(tag,attrs,parent=svg)=>{const n=document.createElementNS(ns,tag);for(const k in attrs)n.setAttribute(k,attrs[k]);parent.append(n);return n};
@@ -66,7 +66,7 @@ button,input{font:inherit;color:inherit;background:#0d2635;border:1px solid #3c6
   const z=data.worldTwo.terrain;for(let y=0;y<40;y++)for(let x=0;x<36;x++)make('rect',{x:sx(2000+x*125),y:sy(-2375+y*125),width:125*scale+.3,height:125*scale+.3,fill:'var(--foreground)',opacity:.025+Math.min(z[y*37+x]/200,1)*.19},secondField);
   make('circle',{cx:sx(4000),cy:sy(0),r:2000*scale,fill:'none',stroke:'var(--border)','stroke-width':1,'data-region':'world-two'},field);
   const name=make('text',{x:sx(4000),y:Math.max(T+18,sy(2350)),'text-anchor':'middle','font-weight':'bold'},field);name.textContent=w<600?'WORLD 2':'WORLD 2 · 2 km RADIUS';
-  const subtitle=make('text',{x:sx(4000),y:Math.min(B-6,sy(-2350)),'text-anchor':'middle'},field);subtitle.textContent=w<600?'144 Vitraleaf':'144 Vitraleaf · enclosing mountains';
+  const subtitle=make('text',{x:sx(4000),y:Math.min(B-6,sy(-2350)),'text-anchor':'middle'},field);subtitle.textContent=w<600?'288 Vitraleaf':'288 Vitraleaf · enclosing mountains';
   make('line',{x1:sx(1900),y1:sy(0),x2:sx(2100),y2:sy(0),stroke:'var(--viz-series-6)','stroke-width':2},field);
   const link=make('text',{x:sx(2000),y:sy(0)+30,'text-anchor':'middle','font-size':10},field);link.textContent='OPEN PASS · 200 m';
  }
@@ -94,4 +94,4 @@ button,input{font:inherit;color:inherit;background:#0d2635;border:1px solid #3c6
  svg.addEventListener('pointercancel',()=>{drag=null;});new ResizeObserver(draw).observe(root);draw();
  })().catch(error=>{document.querySelector('.hp-seed-status').textContent=error.message;});
  </script>
-</div><footer style="max-width:1396px;margin:0 auto">HS1 generator · Initial world layout. Saved progress is separate. Bookmark the URL to keep your seed.<br>HISPACE · Highor · <a href="https://github.com/Highor/hispacemap">Source</a></footer></body></html>
+</div><footer style="max-width:1396px;margin:0 auto">HS1 generator · Initial world layout. Saved progress is separate. Bookmark the URL to keep your seed.<br>HISPACE · Highor</footer></body></html>

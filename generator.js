@@ -61,10 +61,23 @@ export function generateWorld(seedText,asset){
  for(let t=0;t<20000&&plants.length<48;t++){const aa=f(r.range(0,TAU)),radius=f(Math.sqrt(r.range(f(12000*12000),f(190000*190000)))),p=polar(aa,radius);if(!terrain.valid(p,.9))continue;if(plants.every(o=>distance(p,o)>=26000)&&pois.every(o=>distance(p,o)>=2500)){p.z=terrain.hit(p).z;plants.push(p);}}
  r=new RandomStream(researchSeed^0x7a928);
  for(let t=0;t<40000&&plants.length<192;t++){const aa=f(r.range(0,TAU)),radius=f(Math.sqrt(r.range(f(12000*12000),f(190000*190000)))),p=polar(aa,radius,400000);if(terrain.valid(p,.9)&&plants.slice(48).every(o=>distance(p,o)>=11000)){p.z=terrain.hit(p).z;plants.push(p);}}
+ // Additions retain every HS1 resource ID and original coordinate.
+ const extra=(source,min,max,offset=600)=>{
+  const origin=source.x>200000?400000:0;
+  for(let ring=1;ring<=16;ring++)for(const [dx,dy] of [[1,0],[0,1],[-1,0],[0,-1]]){
+   const p={x:source.x+dx*offset*ring,y:source.y+dy*offset*ring,z:0},radius=Math.hypot(p.x-origin,p.y);
+   if(radius>=min&&radius<=max&&terrain.valid(p,.92)){p.z=terrain.hit(p).z;return p;}
+  }
+  const p={x:source.x+100,y:source.y,z:0};p.z=terrain.height(p);return p;
+ };
+ for(let i=0;i<64;i++)ores.push(extra(ores[i],i<32?28000:150000,i<32?150000:200000,2500));
+ for(let i=0;i<96;i++)glass.push(extra(glass[i],50000,175000));
+ for(let i=0;i<1152;i++)minerals.push(extra(minerals[i],11000,194800));
+ for(let i=0;i<192;i++)plants.push(extra(plants[i],12000,190000));
  const points=asset.points.map(p=>({...p}));
  const add=(kind,p,id=0,remaining=1)=>points.push({kind,x:p.x/100,y:p.y/100,z:p.z/100,id,remaining});
  for(const [kind,p,id] of [['Cache 1',cache1,1],['Cache 2',cache2,2],['Cache 3',cache3,3],['Suit pod',suit,0],['Research',research,0],['Mining cache',mining,0]]){p.z=terrain.height(p);add(kind,p,id);}
- ores.forEach((p,i)=>add(i>=32?(i%2?'Vesperite':'Asterium'):(i%2?'Bronze':'Iron'),p,i,40));
+ ores.forEach((p,i)=>add(i%64>=32?(i%2?'Vesperite':'Asterium'):(i%2?'Bronze':'Iron'),p,i,40));
  glass.forEach((p,i)=>add('Glass',p,i));minerals.forEach((p,i)=>add(i%2?'Verdite':'Hydrite',p,i));plants.forEach((p,i)=>add('Vitraleaf',p,i));
  const {collision,...base}=asset;return {...base,points,worldSeed:seed,worldGeneratorVersion:1,seedId:`HS1-${seed}`,mapMode:'initial-world',snapshot:`Initial world · HS1-${seed} · no saved progress`};
 }
