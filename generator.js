@@ -99,5 +99,20 @@ export function generateWorld(seedText,asset){
  for(const [kind,p,id] of [['Cache 1',cache1,1],['Cache 2',cache2,2],['Cache 3',cache3,3],['Suit pod',suit,0],['Research',research,0],['Mining cache',mining,0]]){p.z=terrain.height(p);add(kind,p,id);}
  ores.forEach((p,i)=>add(i%64>=32?(i%2?'Vesperite':'Asterium'):(i%2?'Bronze':'Iron'),p,i,40));
  glass.forEach((p,i)=>add('Glass',p,i));minerals.forEach((p,i)=>add(i%2?'Verdite':'Hydrite',p,i));plants.forEach((p,i)=>add('Vitraleaf',p,i));
+ // Western low-hover packs use the same independent seed stream as the game.
+ const guard={x:235000,y:-18000,z:0};let encounter=10;
+ const flyer=p=>{p.z=terrain.height(p)+47;add('Flying enemy',p,encounter++,100);};
+ for(let i=0;i<3;i++){const a=f(f(f(i*2)*PI)/3);flyer({x:guard.x+f(Math.cos(a)*340),y:guard.y+f(Math.sin(a)*340)});}
+ r=random(301);const packs=[];
+ for(let group=0;group<10;group++){
+  let centre=null;
+  for(let attempt=0;attempt<5000;attempt++){
+   const p={x:r.range(215000,380000),y:r.range(-100000,100000)};
+   if(Math.hypot(p.x-400000,p.y)>185000||distance(p,guard)<9000||!terrain.valid(p,.9)||packs.some(o=>distance(p,o)<12000))continue;
+   centre=p;break;
+  }
+  if(!centre)continue;packs.push(centre);const count=r.integer(1,3);
+  for(let i=0;i<count;i++){const a=f(f(f(i*2)*PI)/count);flyer({x:centre.x+f(Math.cos(a)*180),y:centre.y+f(Math.sin(a)*180)});}
+ }
  const {collision,...base}=asset;return {...base,points,worldSeed:seed,worldGeneratorVersion:1,seedId:`HS1-${seed}`,mapMode:'initial-world',snapshot:`Initial world · HS1-${seed} · no saved progress`};
 }

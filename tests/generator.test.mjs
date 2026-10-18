@@ -7,11 +7,11 @@ for(const bad of ['','HS2-1','HS1-0','HS1--1','HS1-2147483648','HS1-1x'])assert.
 assert.equal(parseSeed(' hs1-42 '),42);
 for(const ref of references){
  const map=generateWorld(ref.seed,assets);
- assert.equal(map.points.length,ref.points.length+3456+64+96+192,ref.seed+' doubled resource count');
+ assert.equal(map.points.length,ref.points.length+3456+64+96+192+10+map.points.filter(p=>p.kind==='Flying enemy').length,ref.seed+' doubled resource count');
  for(const [kind,id,x,y] of ref.points){
   const point=map.points.find(p=>p.kind===kind&&p.id===id);
   // Static enemy markers intentionally share id 0; validate their geometry by nearest point.
-  const candidates=map.points.filter(p=>p.kind===kind&&p.id===id);
+  const candidates=map.points.filter(p=>p.kind===kind&&(kind==='Enemy'||p.id===id));
   assert.ok(point && candidates.some(p=>Math.hypot(p.x-x,p.y-y)<.02),`${ref.seed}: ${kind} ${id} differs from Unreal`);
  }
  assert.equal(map.points.filter(p=>p.kind==='Hydrite').length,2304);
@@ -39,3 +39,14 @@ const expanded=generateWorld('HS1-123456789',assets);
 assert.equal(additions.length,3808);
 for(const [kind,id,x,y] of additions){const p=expanded.points.find(p=>p.kind===kind&&p.id===id);assert.ok(p&&Math.hypot(p.x-x,p.y-y)<.02,`Additional ${kind} ${id} differs from Unreal`);}
 console.log('All 3808 added resource sites match Unreal within 2 cm.');
+
+for(const seed of ['HS1-1','HS1-42','HS1-123456789']){
+ const p=generateWorld(seed,assets).points;
+ assert.equal(p.filter(p=>p.kind==='Enemy').length,7);
+ assert.equal(p.filter(p=>p.kind==='Settlement capsule').length,4);
+ assert.equal(p.filter(p=>p.kind==='Settlement chest').length,1);
+ assert.equal(p.filter(p=>p.kind==='Medical regulator').length,1);
+ const f=p.filter(p=>p.kind==='Flying enemy');assert.ok(f.length>=13&&f.length<=33);assert.ok(f.every(p=>p.x>2000&&p.x<4000&&p.remaining===100));
+ assert.equal(f.filter(p=>Math.hypot(p.x-2350,p.y+180)<4).length,3);
+}
+console.log('Western settlement and seeded stinger checks passed.');

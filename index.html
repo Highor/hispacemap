@@ -39,7 +39,7 @@ button,input{font:inherit;color:inherit;background:#0d2635;border:1px solid #3c6
 .hp-filter i{flex-shrink:0}
 </style>
  <script type="module">
- import {generateWorld} from "./generator.js?v=resource-sites-4";
+ import {generateWorld} from "./generator.js?v=selfcare-1";
  (async()=>{
  const root=document.getElementById('hispace-world-map'), svg=root.querySelector('.hp-map'), ns='http://www.w3.org/2000/svg';
  const response=await fetch('./assets/world-hs1.json');if(!response.ok)throw Error('Terrain could not be loaded. Please reload the page.');
@@ -59,9 +59,9 @@ button,input{font:inherit;color:inherit;background:#0d2635;border:1px solid #3c6
  };
  input.addEventListener('keydown',event=>{if(event.key==='Enter')generate.click();});
  const names={'Base':'Main capsule','Player':'Starting position','Cache 1':'Solar cache','Cache 2':'Repair cache','Cache 3':'Power cache','Suit pod':'Spacesuit pod','Research':'Research capsule','Mining cache':'Mining cache','Future impact':'Future impact','Impact site':'Impact site','Tunnel 1':'Pass · west','Tunnel 2':'Pass · east','Enemy':'Enemy','Narrow pass':'Mountain pass','Danger sign':'DANGER sign','Skeleton':'Skeleton','Crash module':'Crashed module','Module chest':'Module chest','Module record':'Module record'};
- const groups=[['Enemies · 3 × 100 HP','var(--red)','Enemy'],['Locations','var(--foreground)',null],['Iron · 32 fields','var(--viz-series-1)','Iron'],['Bronze · 32 fields','var(--viz-series-2)','Bronze'],['Glass · 192 pieces','var(--viz-series-3)','Glass'],['Hydrite · 2304','var(--viz-series-4)','Hydrite'],['Verdite · 2304','var(--viz-series-5)','Verdite'],['Vitraleaf · 96 + 288 plants','var(--green)','Vitraleaf'],['Asterium · 32 fields','var(--purple)','Asterium'],['Vesperite · 32 fields','var(--yellow)','Vesperite']];
+ const groups=[['Enemies · 7 walkers + stingers','var(--red)','Enemy'],['Locations','var(--foreground)',null],['Iron · 32 fields','var(--viz-series-1)','Iron'],['Bronze · 32 fields','var(--viz-series-2)','Bronze'],['Glass · 192 pieces','var(--viz-series-3)','Glass'],['Hydrite · 2304','var(--viz-series-4)','Hydrite'],['Verdite · 2304','var(--viz-series-5)','Verdite'],['Vitraleaf · 96 + 288 plants','var(--green)','Vitraleaf'],['Asterium · 32 fields','var(--purple)','Asterium'],['Vesperite · 32 fields','var(--yellow)','Vesperite']];
  const enabledKinds=new Set();
- const groupFor=p=>groups.find(g=>g[2]===p.kind)?.[2]||'Locations';
+ const groupFor=p=>p.kind==='Flying enemy'?'Enemy':groups.find(g=>g[2]===p.kind)?.[2]||'Locations';
  const isVisible=p=>p.kind==='Base'||enabledKinds.has(groupFor(p));
  for(const [label,color,kind] of groups){
   const e=document.createElement('label');e.className='hp-filter text-small';
@@ -77,7 +77,7 @@ button,input{font:inherit;color:inherit;background:#0d2635;border:1px solid #3c6
  let cx=2000,cy=0,half=4800,w=700,h=590,selected=null,drag=null,moved=false;
  const make=(tag,attrs,parent=svg)=>{const n=document.createElementNS(ns,tag);for(const k in attrs)n.setAttribute(k,attrs[k]);parent.append(n);return n};
  const mx=x=>x;
- const color=p=>groups.find(g=>g[2]===p.kind)?.[1]||'var(--foreground)';
+ const color=p=>p.kind==='Flying enemy'?'var(--red)':groups.find(g=>g[2]===p.kind)?.[1]||'var(--foreground)';
  let sx,sy,scale,L=46,T=16,R,B;
 
  function draw(){w=root.clientWidth;h=Math.max(380,Math.min(800,w*.7+30));svg.setAttribute('viewBox',`0 0 ${w} ${h}`);svg.setAttribute('height',h);svg.replaceChildren();R=w-14;B=h-40;const side=R-L;scale=side/(2*half);sx=x=>L+(x-cx+half)*scale;sy=y=>(T+B)/2+(cy-y)*scale;
@@ -103,7 +103,7 @@ button,input{font:inherit;color:inherit;background:#0d2635;border:1px solid #3c6
  for(const base of data.points.filter(p=>isVisible(p)&&(p.kind==='Base'||p.kind==='Small capsule')))make('circle',{cx:sx(mx(base.x)),cy:sy(base.y),r:50*scale,fill:'var(--viz-series-6)','fill-opacity':.2,stroke:'var(--viz-series-6)','stroke-opacity':.8,'stroke-width':1},field);
  const ordered=data.points.filter(isVisible).sort((a,b)=>(groups.some(g=>g[2]===a.kind)?0:1)-(groups.some(g=>g[2]===b.kind)?0:1));
  for(const p of ordered){const x=sx(mx(p.x)),y=sy(p.y);if(x<L-10||x>R+10||y<T-10||y>B+10)continue;const res=['Hydrite','Verdite','Vitraleaf'].includes(p.kind),ore=['Iron','Bronze','Asterium','Vesperite'].includes(p.kind);const r=res?2:ore?5:p.kind==='Glass'?3:6;const a={'data-kind':p.kind,'data-world':p.x>=2000?'2':'1',fill:p.remaining?color(p):'var(--background)',stroke:color(p),'stroke-width':p.remaining?.7:1.4,opacity:res?.7:1};
- if(ore)make('rect',{x:x-r,y:y-r,width:r*2,height:r*2,...a},field);else if(p.kind==='Glass')make('path',{d:`M${x} ${y-r}l${r} ${r}l${-r} ${r}l${-r} ${-r}Z`,...a},field);else if(res||p.kind==='Enemy')make('circle',{cx:x,cy:y,r,...a},field);else make('path',{d:`M${x} ${y-r-2}l${r+1} ${r*2+2}h${-2*r-2}Z`,...a},field);
+ if(ore)make('rect',{x:x-r,y:y-r,width:r*2,height:r*2,...a},field);else if(p.kind==='Glass')make('path',{d:`M${x} ${y-r}l${r} ${r}l${-r} ${r}l${-r} ${-r}Z`,...a},field);else if(res||p.kind==='Enemy'||p.kind==='Flying enemy')make('circle',{cx:x,cy:y,r,...a},field);else make('path',{d:`M${x} ${y-r-2}l${r+1} ${r*2+2}h${-2*r-2}Z`,...a},field);
  if((w>=600||half<1600||p.kind==='Base')&&!res&&!ore&&p.kind!=='Glass'&&(half<1600||['Base','Research','Future impact','Impact site','Tunnel 1','Enemy'].includes(p.kind))&&(half<600||!['Cache 1','Cache 2','Cache 3','Smelter','Player'].includes(p.kind))){const t=make('text',{x:Math.min(R-8,Math.max(L+8,x)),y:y+(p.kind.startsWith('Tunnel')?19:-11),'text-anchor':x>R-110?'end':x<L+100?'start':'middle','paint-order':'stroke',stroke:'var(--background)','stroke-width':3},field);t.textContent=names[p.kind]||p.kind;}
  }
  if(selected){make('circle',{cx:sx(mx(selected.x)),cy:sy(selected.y),r:12,fill:'none',stroke:'var(--foreground)','stroke-width':2},field);}
@@ -114,7 +114,7 @@ button,input{font:inherit;color:inherit;background:#0d2635;border:1px solid #3c6
  svg.addEventListener('wheel',e=>{e.preventDefault();zoom(e.deltaY>0?1.2:1/1.2);},{passive:false});
  svg.addEventListener('pointerdown',e=>{drag={x:e.clientX,y:e.clientY,cx,cy};moved=false;svg.setPointerCapture(e.pointerId);});
  svg.addEventListener('pointermove',e=>{if(!drag)return;const dx=e.clientX-drag.x,dy=e.clientY-drag.y;if(Math.hypot(dx,dy)>4)moved=true;if(moved){cx=drag.cx-dx/scale;cy=drag.cy+dy/scale;draw();}});
- svg.addEventListener('pointerup',e=>{drag=null;if(moved)return;const rect=svg.getBoundingClientRect(),px=e.clientX-rect.left,py=e.clientY-rect.top;let best=null,dist=24;for(const p of data.points.filter(isVisible)){const d=Math.hypot(sx(mx(p.x))-px,sy(p.y)-py);if(d<dist){best=p;dist=d;}}if(best){selected=best;const state=best.kind==='Enemy'?`${best.remaining} HP`:(best.remaining?'Available':'Empty / collected');root.querySelector('.hp-detail').textContent=`${names[best.kind]||best.kind} · E ${Math.round(best.x)} m / N ${Math.round(-best.y)} m · ${state}`;draw();}});
+ svg.addEventListener('pointerup',e=>{drag=null;if(moved)return;const rect=svg.getBoundingClientRect(),px=e.clientX-rect.left,py=e.clientY-rect.top;let best=null,dist=24;for(const p of data.points.filter(isVisible)){const d=Math.hypot(sx(mx(p.x))-px,sy(p.y)-py);if(d<dist){best=p;dist=d;}}if(best){selected=best;const state=['Enemy','Flying enemy'].includes(best.kind)?`${best.remaining} HP`:(best.remaining?'Available':'Empty / collected');root.querySelector('.hp-detail').textContent=`${names[best.kind]||best.kind} · E ${Math.round(best.x)} m / N ${Math.round(-best.y)} m · ${state}`;draw();}});
  svg.addEventListener('pointercancel',()=>{drag=null;});new ResizeObserver(draw).observe(root);draw();
  })().catch(error=>{document.querySelector('.hp-seed-status').textContent=error.message;});
  </script>
