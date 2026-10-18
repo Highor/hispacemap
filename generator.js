@@ -108,7 +108,7 @@ export function generateWorld(seedText,asset){
   let centre=null;
   for(let attempt=0;attempt<5000;attempt++){
    const p={x:r.range(215000,380000),y:r.range(-100000,100000)};
-   if(Math.hypot(p.x-400000,p.y)>185000||distance(p,guard)<9000||!terrain.valid(p,.9)||packs.some(o=>distance(p,o)<12000))continue;
+   if(Math.hypot(p.x-400000,p.y)>185000||distance(p,guard)<9000||distance(p,{x:275000,y:-85000})<9000||!terrain.valid(p,.9)||packs.some(o=>distance(p,o)<12000))continue;
    centre=p;break;
   }
   if(!centre)continue;packs.push(centre);const count=r.integer(1,3);
