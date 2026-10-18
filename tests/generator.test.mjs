@@ -19,8 +19,17 @@ for(const ref of references){
  for(const [kind,count] of [['Iron',32],['Bronze',32],['Asterium',32],['Vesperite',32],['Glass',192],['Verdite',1152]])assert.equal(map.points.filter(p=>p.kind===kind).length,count);
  assert.equal(map.points.filter(p=>p.kind==='Vitraleaf'&&p.x<2000).length,96);
  assert.equal(map.points.filter(p=>p.kind==='Vitraleaf'&&p.x>=2000).length,288);
+ const minerals=map.points.filter(p=>['Hydrite','Verdite'].includes(p.kind)).sort((a,b)=>a.id-b.id);
+ const groups=points=>{const result=[];for(const p of points){const group=result.at(-1),last=group?.at(-1);if(!last||Math.hypot(p.x-last.x,p.y-last.y)>=4)result.push([p]);else group.push(p);}return result;};
+ const originals=minerals.slice(0,1152),added=minerals.slice(1152),originalGroups=groups(originals),addedGroups=groups(added);
+ assert.equal(addedGroups.length,originalGroups.length,'Exactly one new location per original group');
+ for(let g=0;g<originalGroups.length;g++){
+  assert.equal(addedGroups[g].length,originalGroups[g].length,'Original group sizes retained');
+  assert.deepEqual(addedGroups[g].map(p=>p.kind),originalGroups[g].map(p=>p.kind),'New locations duplicate each resource type count');
+  for(const p of addedGroups[g])for(const q of [...originals,...addedGroups.slice(0,g).flat()])assert.ok(Math.hypot(p.x-q.x,p.y-q.y)>=50,'New groups are at least 50 m from existing locations');
+ }
  assert.deepEqual(generateWorld(ref.seed,assets),map,'repeatability');
- console.log(ref.seed+': '+map.points.length+' Unreal placements matched within 2 cm');
+ console.log(ref.seed+': original HS1 placements retained; '+originalGroups.length+' original + '+addedGroups.length+' new mineral locations');
 }
 assert.notDeepEqual(generateWorld('HS1-1',assets).points,generateWorld('HS1-42',assets).points);
 console.log('HS1 generator checks passed.');

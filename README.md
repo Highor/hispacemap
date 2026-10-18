@@ -35,3 +35,5 @@ Resource density (18 October 2026): the original HS1 locations and IDs are retai
 The legend uses accessible cyan checkbox controls. Every category starts unchecked on each page load. Filters combine, survive Generate Map within the current page and hide marker hit targets as well as their labels. Terrain remains visible. No filter preferences are stored.
 
 The main base is always visible and selectable, independently of the Locations checkbox. All other marker categories retain their default-off behavior.
+
+Hydrite/Verdite correction: double the number of locations by placing one separate new group for every original group, preserving its 1-3 pickup composition. New groups are at least 50 m from original and earlier added groups. Original HS1 IDs 0-1151 and all unrelated resources remain unchanged. The total remains 2,304 mineral pickups. Seven seed tests verify exact group-count doubling, composition, separation and repeatability; new positions match Unreal.
