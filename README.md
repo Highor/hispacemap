@@ -30,10 +30,10 @@ or private project repository is included. Site and game map assets © Highor.
 GitHub Pages publishes the root of main. CNAME points to hispacemap.highor.com;
 the DNS CNAME should point to highor.github.io.
 
-Resource density (18 October 2026): the original HS1 locations and IDs are retained. World 1 has 2,304 Hydrite/Verdite deposits, 128 ore fields (32 per type), 192 glass pieces and 96 Vitraleaf. World 2 has 288 Vitraleaf. The append-only extension is matched against a fresh Unreal export in tests/resource-additions-reference.json. No saved player state is published.
+Resource density (18 October 2026): the original HS1 locations and IDs are retained. World 1 has 4,608 Hydrite/Verdite deposits (2,304 each), 128 ore fields (32 per type), 192 glass pieces and 96 Vitraleaf. World 2 has 288 Vitraleaf. The append-only extension is matched against a fresh Unreal export in tests/resource-additions-reference.json. No saved player state is published.
 
 The legend uses accessible cyan checkbox controls. Every category starts unchecked on each page load. Filters combine, survive Generate Map within the current page and hide marker hit targets as well as their labels. Terrain remains visible. No filter preferences are stored.
 
 The main base is always visible and selectable, independently of the Locations checkbox. All other marker categories retain their default-off behavior.
 
-Hydrite/Verdite correction: double the number of locations by placing one separate new group for every original group, preserving its 1-3 pickup composition. New groups are at least 50 m from original and earlier added groups. Original HS1 IDs 0-1151 and all unrelated resources remain unchanged. The total remains 2,304 mineral pickups. Seven seed tests verify exact group-count doubling, composition, separation and repeatability; new positions match Unreal.
+Hydrite/Verdite: 2,304 pickups of each type, 4,608 total. Original HS1 IDs 0-1151 and all unrelated resources remain unchanged. Three independently placed groups duplicate every original group's 1-3 pickup composition. This doubles the previous count of both pickups and locations (for HS1-123456789: 1,362 to 2,724 locations). The first added batch retains its 50 m separation; later added groups are at least 40 m from prior locations. Seven-seed tests cover counts, composition, spacing and repeatability, with new coordinates matched to Unreal.

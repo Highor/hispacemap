@@ -73,10 +73,10 @@ export function generateWorld(seedText,asset){
  for(let i=0;i<64;i++)ores.push(extra(ores[i],i<32?28000:150000,i<32?150000:200000,2500));
  for(let i=0;i<96;i++)glass.push(extra(glass[i],50000,175000));
  const addedRandom=new RandomStream(researchSeed^0x6d312);
- for(let begin=0;begin<1152;){
+ for(let batch=0;batch<3;batch++)for(let begin=0;begin<1152;){
   let end=begin+1;while(end<1152&&distance(minerals[end],minerals[end-1])<400)end++;
   const clear=centre=>{
-   if(minerals.some(p=>distance(centre,p)<5400))return false;
+   if(minerals.some(p=>distance(centre,p)<(batch===0?5400:4400)))return false;
    for(let member=begin;member<end;member++){
     const p={x:centre.x+minerals[member].x-minerals[begin].x,y:centre.y+minerals[member].y-minerals[begin].y,z:0},radius=Math.hypot(p.x,p.y);
     if(radius<11000||radius>194800||!terrain.valid(p,.9))return false;
