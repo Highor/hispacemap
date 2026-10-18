@@ -33,3 +33,5 @@ the DNS CNAME should point to highor.github.io.
 Resource density (18 October 2026): the original HS1 locations and IDs are retained. World 1 has 2,304 Hydrite/Verdite deposits, 128 ore fields (32 per type), 192 glass pieces and 96 Vitraleaf. World 2 has 288 Vitraleaf. The append-only extension is matched against a fresh Unreal export in tests/resource-additions-reference.json. No saved player state is published.
 
 The legend uses accessible cyan checkbox controls. Every category starts unchecked on each page load. Filters combine, survive Generate Map within the current page and hide marker hit targets as well as their labels. Terrain remains visible. No filter preferences are stored.
+
+The main base is always visible and selectable, independently of the Locations checkbox. All other marker categories retain their default-off behavior.

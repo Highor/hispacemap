@@ -62,7 +62,7 @@ button,input{font:inherit;color:inherit;background:#0d2635;border:1px solid #3c6
  const groups=[['Enemies · 3 × 100 HP','var(--red)','Enemy'],['Locations','var(--foreground)',null],['Iron · 32 fields','var(--viz-series-1)','Iron'],['Bronze · 32 fields','var(--viz-series-2)','Bronze'],['Glass · 192 pieces','var(--viz-series-3)','Glass'],['Hydrite · 1152','var(--viz-series-4)','Hydrite'],['Verdite · 1152','var(--viz-series-5)','Verdite'],['Vitraleaf · 96 + 288 plants','var(--green)','Vitraleaf'],['Asterium · 32 fields','var(--purple)','Asterium'],['Vesperite · 32 fields','var(--yellow)','Vesperite']];
  const enabledKinds=new Set();
  const groupFor=p=>groups.find(g=>g[2]===p.kind)?.[2]||'Locations';
- const isVisible=p=>enabledKinds.has(groupFor(p));
+ const isVisible=p=>p.kind==='Base'||enabledKinds.has(groupFor(p));
  for(const [label,color,kind] of groups){
   const e=document.createElement('label');e.className='hp-filter text-small';
   const checkbox=document.createElement('input');checkbox.type='checkbox';checkbox.checked=false;
