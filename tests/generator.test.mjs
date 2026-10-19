@@ -1,13 +1,13 @@
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {generateWorld,parseSeed,RandomStream} from '../generator.js';
+import {generateWorld,parseSeed,RandomStream,Terrain} from '../generator.js';
 const assets=JSON.parse(readFileSync(new URL('../assets/world-hs1.json',import.meta.url)));
 const references=JSON.parse(readFileSync(new URL('./hs1-reference.json',import.meta.url)));
 for(const bad of ['','HS2-1','HS1-0','HS1--1','HS1-2147483648','HS1-1x'])assert.throws(()=>parseSeed(bad));
 assert.equal(parseSeed(' hs1-42 '),42);
 for(const ref of references){
  const map=generateWorld(ref.seed,assets);
- assert.equal(map.points.length,ref.points.length+3456+64+96+192+10+map.points.filter(p=>p.kind==='Flying enemy').length,ref.seed+' doubled resource count');
+ assert.equal(map.points.length,ref.points.length+3456+64+96+192+33+map.points.filter(p=>p.kind==='Flying enemy').length,ref.seed+' doubled resource count');
  for(const [kind,id,x,y] of ref.points){
   const point=map.points.find(p=>p.kind===kind&&p.id===id);
   // Static enemy markers intentionally share id 0; validate their geometry by nearest point.
@@ -42,11 +42,18 @@ console.log('All 3808 added resource sites match Unreal within 2 cm.');
 
 for(const seed of ['HS1-1','HS1-42','HS1-123456789']){
  const p=generateWorld(seed,assets).points;
- assert.equal(p.filter(p=>p.kind==='Enemy').length,7);
+ assert.equal(p.filter(p=>p.kind==='Enemy').length,15);
  assert.equal(p.filter(p=>p.kind==='Settlement capsule').length,4);
  assert.equal(p.filter(p=>p.kind==='Settlement chest').length,1);
  assert.equal(p.filter(p=>p.kind==='Medical regulator').length,1);
- const f=p.filter(p=>p.kind==='Flying enemy');assert.ok(f.length>=13&&f.length<=33);assert.ok(f.every(p=>p.x>2000&&p.x<4000&&p.remaining===100));
+ const f=p.filter(p=>p.kind==='Flying enemy');assert.ok(f.length>=23&&f.length<=43);assert.ok(f.every(p=>p.x>2000&&p.x<4000&&p.remaining===100));
  assert.equal(f.filter(p=>Math.hypot(p.x-2350,p.y+180)<4).length,3);
 }
 console.log('Western settlement and seeded stinger checks passed.');
+
+// Terrain-only relief update retains every existing HS1 XY/ID fixture above.
+const terrain=new Terrain(assets.collision);let low=Infinity,high=-Infinity;
+for(let x=-150000;x<=150000;x+=12500)for(let y=-150000;y<=150000;y+=12500)if(Math.hypot(x,y)<180000){const h=terrain.hit({x:400000+x,y});assert.ok(h&&h.normal>=.9);low=Math.min(low,h.z);high=Math.max(high,h.z);}
+assert.ok(high-low>2000,'Second basin has at least 20 m of walkable relief');
+for(const [x,y] of [[4000,0],[3500,-500],[4500,500]]){const index=Math.round((y+2500)/125)*37+Math.round((x-2000)/125);assert.ok(Math.abs(assets.worldTwo.terrain[index]-terrain.height({x:x*100,y:y*100})/100)<.11,'Display heights match the collision mesh');}
+console.log('World 2 relief and display/collision agreement passed.');
