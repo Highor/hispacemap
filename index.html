@@ -11,7 +11,7 @@ button,input{font:inherit;color:inherit;background:#0d2635;border:1px solid #3c6
 <p id="spoiler-question" class="spoiler-question">Are you sure you want to use the map generator?</p>
 <div class="spoiler-actions"><button type="button" id="spoiler-leave" autofocus>Go back</button><button type="button" id="spoiler-continue" class="spoiler-confirm">Use map generator</button></div></dialog>
 <script type="module" src="./spoiler-dialog.js?v=session-1"></script><div id="hispace-world-map">
- <header><a class="brand" href="./">HISPACE</a><span>SURVEY ATLAS</span></header><h1>World map</h1><p class="intro">Enter the world seed shown in your Save Game or Load Game slot.</p>
+ <h2>Hispace · World Map</h2>
  <div class="hp-seed-controls"><label>World seed <input autocomplete="off" class="hp-seed-input" aria-label="World seed" placeholder="HS1-123456789" maxlength="14" spellcheck="false"></label><button type="button" class="btn hp-generate">Generate Map</button><div class="hp-seed-status text-small" role="status" aria-live="polite"></div></div>
  <div class="hp-legend" aria-label="Map legend"></div>
  <svg class="hp-map" role="img" aria-label="Hispace terrain, resources and recovery sites"></svg>
@@ -39,7 +39,7 @@ button,input{font:inherit;color:inherit;background:#0d2635;border:1px solid #3c6
 .hp-filter i{flex-shrink:0}
 </style>
  <script type="module">
- import {generateWorld} from "./generator.js?v=outpost-1";
+ import {generateWorld} from "./generator.js?v=west-wildlife-1";
  (async()=>{
  const root=document.getElementById('hispace-world-map'), svg=root.querySelector('.hp-map'), ns='http://www.w3.org/2000/svg';
  const response=await fetch('./assets/world-hs1.json?v=world-two-relief-1');if(!response.ok)throw Error('Terrain could not be loaded. Please reload the page.');
@@ -54,12 +54,12 @@ button,input{font:inherit;color:inherit;background:#0d2635;border:1px solid #3c6
  generate.onclick=async()=>{
   const seed=input.value.trim().toUpperCase(), match=/^HS1-([1-9][0-9]{0,9})$/.exec(seed);
   if(!match || Number(match[1])>2147483647){status.textContent='Use HS1- followed by a number from 1 to 2147483647.';return;}
-  generate.disabled=true;status.textContent='Generating your world…';
+  generate.disabled=true;status.textContent='Generating the initial world with Unreal Engine…';
   try{await new Promise(requestAnimationFrame);displayMap(generateWorld(seed,asset));const url=new URL(location.href);url.search='';url.searchParams.set('seedid',seed);history.replaceState(null,'',url);}catch(error){status.textContent=error.message;}finally{generate.disabled=false;}
  };
  input.addEventListener('keydown',event=>{if(event.key==='Enter')generate.click();});
- const names={'Base':'Main capsule','Player':'Starting position','Cache 1':'Solar cache','Cache 2':'Repair cache','Cache 3':'Power cache','Suit pod':'Spacesuit pod','Research':'Research capsule','Mining cache':'Mining cache','Future impact':'Future impact','Impact site':'Impact site','Tunnel 1':'Pass · west','Tunnel 2':'Pass · east','Enemy':'Enemy','Narrow pass':'Mountain pass','Danger sign':'DANGER sign','Skeleton':'Skeleton','Crash module':'Crashed module','Module chest':'Module chest','Module record':'Module record'};
- const groups=[[`Enemies · ${data.points.filter(p=>p.kind==='Enemy').length} walkers + stingers`,'var(--red)','Enemy'],['Locations','var(--foreground)',null],['Iron · 32 fields','var(--viz-series-1)','Iron'],['Bronze · 32 fields','var(--viz-series-2)','Bronze'],['Glass · 192 pieces','var(--viz-series-3)','Glass'],['Hydrite · 2304','var(--viz-series-4)','Hydrite'],['Verdite · 2304','var(--viz-series-5)','Verdite'],['Vitraleaf · 96 + 288 plants','var(--green)','Vitraleaf'],['Asterium · 32 fields','var(--purple)','Asterium'],['Vesperite · 32 fields','var(--yellow)','Vesperite']];
+ const names={'Base':'Main capsule','Player':'Starting position','Cache 1':'Solar cache','Cache 2':'Repair cache','Cache 3':'Power cache','Suit pod':'Spacesuit pod','Research':'Research capsule','Mining cache':'Mining cache','Future impact':'Future impact','Impact site':'Impact site','Tunnel 1':'Pass Â· west','Tunnel 2':'Pass Â· east','Enemy':'Enemy','Narrow pass':'Mountain pass','Danger sign':'DANGER sign','Skeleton':'Skeleton','Crash module':'Crashed module','Module chest':'Module chest','Module record':'Module record'};
+ const groups=[['Enemies · 7 walkers + stingers','var(--red)','Enemy'],['Locations','var(--foreground)',null],['Iron · 32 fields','var(--viz-series-1)','Iron'],['Bronze · 32 fields','var(--viz-series-2)','Bronze'],['Glass · 192 pieces','var(--viz-series-3)','Glass'],['Hydrite · 2304','var(--viz-series-4)','Hydrite'],['Verdite · 2304','var(--viz-series-5)','Verdite'],['Vitraleaf · 96 + 288 plants','var(--green)','Vitraleaf'],['Asterium · 32 fields','var(--purple)','Asterium'],['Vesperite · 32 fields','var(--yellow)','Vesperite']];
  const enabledKinds=new Set();
  const groupFor=p=>p.kind==='Flying enemy'?'Enemy':groups.find(g=>g[2]===p.kind)?.[2]||'Locations';
  const isVisible=p=>!['Skeleton','Danger sign'].includes(p.kind)&&(p.kind==='Base'||enabledKinds.has(groupFor(p)));
@@ -114,8 +114,8 @@ button,input{font:inherit;color:inherit;background:#0d2635;border:1px solid #3c6
  svg.addEventListener('wheel',e=>{e.preventDefault();zoom(e.deltaY>0?1.2:1/1.2);},{passive:false});
  svg.addEventListener('pointerdown',e=>{drag={x:e.clientX,y:e.clientY,cx,cy};moved=false;svg.setPointerCapture(e.pointerId);});
  svg.addEventListener('pointermove',e=>{if(!drag)return;const rect=svg.getBoundingClientRect(),dx=(e.clientX-drag.x)*w/rect.width,dy=(e.clientY-drag.y)*h/rect.height;if(Math.hypot(dx,dy)>4)moved=true;if(moved){cx=drag.cx-dx/scale;cy=drag.cy-dy/scale;draw();}});
- svg.addEventListener('pointerup',e=>{drag=null;if(moved)return;const rect=svg.getBoundingClientRect(),px=(e.clientX-rect.left)*w/rect.width,py=(e.clientY-rect.top)*h/rect.height;let best=null,dist=24;for(const p of data.points.filter(isVisible)){const d=Math.hypot(sx(mx(p.x))-px,sy(p.y)-py);if(d<dist){best=p;dist=d;}}if(best){selected=best;const state=['Enemy','Flying enemy'].includes(best.kind)?`${best.remaining} HP`:(best.remaining?'Available':'Empty / collected');root.querySelector('.hp-detail').textContent=`${names[best.kind]||best.kind} · E ${Math.round(best.x)} m / N ${Math.round(-best.y)} m · ${state}`;draw();}});
+ svg.addEventListener('pointerup',e=>{drag=null;if(moved)return;const rect=svg.getBoundingClientRect(),px=(e.clientX-rect.left)*w/rect.width,py=(e.clientY-rect.top)*h/rect.height;let best=null,dist=24;for(const p of data.points.filter(isVisible)){const d=Math.hypot(sx(mx(p.x))-px,sy(p.y)-py);if(d<dist){best=p;dist=d;}}if(best){selected=best;const state=['Enemy','Flying enemy'].includes(best.kind)?`${best.remaining} HP`:(best.remaining?'Available':'Empty / collected');root.querySelector('.hp-detail').textContent=`${names[best.kind]||best.kind} Â· E ${Math.round(best.x)} m / N ${Math.round(-best.y)} m Â· ${state}`;draw();}});
  svg.addEventListener('pointercancel',()=>{drag=null;});new ResizeObserver(draw).observe(root);draw();
  })().catch(error=>{document.querySelector('.hp-seed-status').textContent=error.message;});
  </script>
-</div><footer style="max-width:1396px;margin:0 auto">HS1 generator · Initial world layout. Saved progress is separate. Bookmark the URL to keep your seed.<br>HISPACE · Highor</footer></body></html>
+</div><footer style="max-width:1396px;margin:0 auto">HS1 generator Â· Initial world layout. Saved progress is separate. Bookmark the URL to keep your seed.<br>HISPACE Â· Highor</footer></body></html>

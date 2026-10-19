@@ -7,7 +7,7 @@ for(const bad of ['','HS2-1','HS1-0','HS1--1','HS1-2147483648','HS1-1x'])assert.
 assert.equal(parseSeed(' hs1-42 '),42);
 for(const ref of references){
  const map=generateWorld(ref.seed,assets);
- assert.equal(map.points.length,ref.points.length+3456+64+96+192+33+map.points.filter(p=>p.kind==='Flying enemy').length,ref.seed+' doubled resource count');
+ assert.equal(map.points.length,ref.points.length+3456+64+96+192+37+map.points.filter(p=>p.kind==='Flying enemy').length,ref.seed+' doubled resource count');
  for(const [kind,id,x,y] of ref.points){
   const point=map.points.find(p=>p.kind===kind&&p.id===id);
   // Static enemy markers intentionally share id 0; validate their geometry by nearest point.
@@ -42,11 +42,11 @@ console.log('All 3808 added resource sites match Unreal within 2 cm.');
 
 for(const seed of ['HS1-1','HS1-42','HS1-123456789']){
  const p=generateWorld(seed,assets).points;
- assert.equal(p.filter(p=>p.kind==='Enemy').length,15);
+ assert.equal(p.filter(p=>p.kind==='Enemy').length,19);
  assert.equal(p.filter(p=>p.kind==='Settlement capsule').length,4);
  assert.equal(p.filter(p=>p.kind==='Settlement chest').length,1);
  assert.equal(p.filter(p=>p.kind==='Medical regulator').length,1);
- const f=p.filter(p=>p.kind==='Flying enemy');assert.ok(f.length>=23&&f.length<=43);assert.ok(f.every(p=>p.x>2000&&p.x<4000&&p.remaining===100));
+ const f=p.filter(p=>p.kind==='Flying enemy');assert.ok(f.length>=51&&f.length<=127);assert.ok(f.every(p=>p.x>2000&&p.x<4000&&p.remaining===100));
  assert.equal(f.filter(p=>Math.hypot(p.x-2350,p.y+180)<4).length,3);
 }
 console.log('Western settlement and seeded stinger checks passed.');
@@ -57,3 +57,15 @@ for(let x=-150000;x<=150000;x+=12500)for(let y=-150000;y<=150000;y+=12500)if(Mat
 assert.ok(high-low>2000,'Second basin has at least 20 m of walkable relief');
 for(const [x,y] of [[4000,0],[3500,-500],[4500,500]]){const index=Math.round((y+2500)/125)*37+Math.round((x-2000)/125);assert.ok(Math.abs(assets.worldTwo.terrain[index]-terrain.height({x:x*100,y:y*100})/100)<.11,'Display heights match the collision mesh');}
 console.log('World 2 relief and display/collision agreement passed.');
+
+for(const seed of ['HS1-1','HS1-42','HS1-123456789']){
+ const map=generateWorld(seed,assets),wild=map.points.filter(p=>p.id>=200&&['Enemy','Flying enemy'].includes(p.kind));
+ assert.equal(wild.filter(p=>p.kind==='Enemy').length,4);
+ assert.ok(wild.filter(p=>p.kind==='Flying enemy').length>=28);
+ for(const p of wild){assert.ok(p.x<4000&&Math.hypot(p.x-4000,p.y)<1852);for(const [x,y] of [[2350,-180],[2750,-850],[2197.5,112.5],[2130,26]])assert.ok(Math.hypot(p.x-x,p.y-y)>198);}
+}
+console.log('Expanded west wildlife density and mission exclusion checks passed.');
+
+const wildlife=JSON.parse(readFileSync(new URL('./west-wildlife-reference.json',import.meta.url)));
+for(const [kind,id,x,y,hp] of wildlife){const p=expanded.points.find(p=>p.kind===kind&&p.id===id);assert.ok(p&&Math.hypot(p.x-x,p.y-y)<.02&&p.remaining===hp,`Western wildlife ${kind} ${id} differs from Unreal`);}
+console.log('Western wildlife matches fresh Unreal positions within 2 cm.');

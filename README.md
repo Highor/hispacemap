@@ -2,8 +2,8 @@
 
 Browser-only map generator for Hispace. Hosted at https://hispacemap.highor.com.
 
-Enter the `HS1-â€¦` seed displayed in a game save/load slot. Generation updates
-`?seedid=HS1-â€¦`; bookmark or share that URL to reopen the same map. No server-side
+Enter the `HS1-Ã¢â‚¬Â¦` seed displayed in a game save/load slot. Generation updates
+`?seedid=HS1-Ã¢â‚¬Â¦`; bookmark or share that URL to reopen the same map. No server-side
 generation, Unreal installation, user account or uploaded save is required.
 
 The map shows the initial world. Buildings, depletion, respawned resources and
@@ -25,7 +25,7 @@ for incompatible game/terrain changes.
 
 The public assets contain only authored terrain, fixed initial marker geometry and
 Oxanium fonts. Font license: assets/OFL.txt. No player save, secret, engine binary
-or private project repository is included. Site and game map assets Â© Highor.
+or private project repository is included. Site and game map assets Ã‚Â© Highor.
 
 GitHub Pages publishes the root of main. CNAME points to hispacemap.highor.com;
 the DNS CNAME should point to highor.github.io.
@@ -41,3 +41,5 @@ Hydrite/Verdite: 2,304 pickups of each type, 4,608 total. Original HS1 IDs 0-115
 World 2 relief revision 1 adds broad walkable basalt hills and valleys. This updates authored ground heights without changing any HS1 resource XY/ID placements, as checked against all existing reference seeds. Display heights and collision queries use the same regenerated mesh. Generator test counts now include the existing northwest outpost, its eight ground enemies and ten flying enemies.
 
 Map orientation: north is up, east is right. Axes and selected marker details use E = X/100 and N = -Y/100, matching the game. Terrain cell edges and pan input share this orientation. Skeletons and danger signs are omitted from Locations and cannot be selected.
+
+Western wildlife extension: independent streams 302/303 append 28 groups of 1–3 stingers and four rare 340-HP ground creatures in World 2 west, avoiding mission sites. Original enemy IDs and positions remain intact. Fresh Unreal reference positions are checked within 2 cm.

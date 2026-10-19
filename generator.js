@@ -114,5 +114,18 @@ export function generateWorld(seedText,asset){
   if(!centre)continue;packs.push(centre);const count=r.integer(1,3);
   for(let i=0;i<count;i++){const a=f(f(f(i*2)*PI)/count);flyer({x:centre.x+f(Math.cos(a)*180),y:centre.y+f(Math.sin(a)*180)});}
  }
- const {collision,...base}=asset;return {...base,points,worldSeed:seed,worldGeneratorVersion:1,seedId:`HS1-${seed}`,mapMode:'initial-world',snapshot:`Initial world · HS1-${seed} · no saved progress`};
+ // Append-only west-basin wildlife: separate streams preserve all original encounters.
+ const missions=[guard,{x:275000,y:-85000},{x:219750,y:11250},{x:213000,y:2600}];
+ const populate=(salt,groups,large)=>{const added=random(salt),sites=[];let serial=0;
+  for(let group=0;group<groups;group++){let centre=null;
+   for(let attempt=0;attempt<5000;attempt++){const p={x:added.range(215000,395000),y:added.range(-180000,180000)};
+    if(Math.hypot(p.x-400000,p.y)>185000||missions.some(m=>distance(p,m)<20000)||!terrain.valid(p,.9)||packs.some(o=>distance(p,o)<10000)||sites.some(o=>distance(p,o)<(large?50000:16000)))continue;
+    centre=p;break;
+   }
+   if(!centre)continue;sites.push(centre);const count=large?1:added.integer(1,3);
+   for(let member=0;member<count;member++){const angle=f(f(f(member*2)*PI)/count);const p=large?centre:{x:centre.x+f(cos(angle)*180),y:centre.y+f(sin(angle)*180)};p.z=terrain.height(p)+(large?120.8:47);add(large?'Enemy':'Flying enemy',p,(large?400:200)+serial++,large?340:100);}
+  }
+ };
+ populate(302,28,false);populate(303,4,true);
+ const {collision,...base}=asset;return {...base,points,worldSeed:seed,worldGeneratorVersion:1,seedId:`HS1-${seed}`,mapMode:'initial-world',snapshot:`Initial world Â· HS1-${seed} Â· no saved progress`};
 }
