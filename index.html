@@ -42,7 +42,7 @@ button,input{font:inherit;color:inherit;background:#0d2635;border:1px solid #3c6
  import {generateWorld} from "./generator.js?v=shuffled-keys-1";
  (async()=>{
  const root=document.getElementById('hispace-world-map'), svg=root.querySelector('.hp-map'), ns='http://www.w3.org/2000/svg';
- const response=await fetch('./assets/world-hs1.json?v=southern-guards-1');if(!response.ok)throw Error('Terrain could not be loaded. Please reload the page.');
+ const response=await fetch('./assets/world-hs1.json?v=sulphrite-1');if(!response.ok)throw Error('Terrain could not be loaded. Please reload the page.');
  const asset=await response.json();
  const requested=new URLSearchParams(location.search).get('seedid')||new URLSearchParams(location.search).get('seed')||'HS1-123456789';
  let initialError='';let data;try{data=generateWorld(requested,asset);}catch(error){initialError=error.message;data=generateWorld('HS1-123456789',asset);}
@@ -59,7 +59,7 @@ button,input{font:inherit;color:inherit;background:#0d2635;border:1px solid #3c6
  };
  input.addEventListener('keydown',event=>{if(event.key==='Enter')generate.click();});
  const names={'Base':'Main capsule','Player':'Starting position','Cache 1':'Solar cache','Cache 2':'Repair cache','Cache 3':'Power cache','Suit pod':'Spacesuit pod','Research':'Research capsule','Mining cache':'Mining cache','Future impact':'Future impact','Impact site':'Impact site','Tunnel 1':'Pass · west','Tunnel 2':'Pass · east','Enemy':'Enemy','Narrow pass':'Mountain pass','Danger sign':'DANGER sign','Skeleton':'Skeleton','Crash module':'Crashed module','Module chest':'Module chest','Module record':'Module record'};
- const groups=[[`Enemies · ${data.points.filter(p=>p.kind==='Enemy').length} walkers + stingers`,'var(--red)','Enemy'],['Locations','var(--foreground)',null],['Iron · 32 fields','var(--viz-series-1)','Iron'],['Bronze · 32 fields','var(--viz-series-2)','Bronze'],['Glass · 192 pieces','var(--viz-series-3)','Glass'],['Hydrite · 2304','var(--viz-series-4)','Hydrite'],['Verdite · 2304','var(--viz-series-5)','Verdite'],['Vitraleaf · 96 + 288 plants','var(--green)','Vitraleaf'],['Asterium · 32 fields','var(--purple)','Asterium'],['Vesperite · 32 fields','var(--yellow)','Vesperite']];
+ const groups=[[`Enemies · ${data.points.filter(p=>p.kind==='Enemy').length} walkers + stingers`,'var(--red)','Enemy'],['Locations','var(--foreground)',null],['Iron · 32 fields','var(--viz-series-1)','Iron'],['Bronze · 32 fields','var(--viz-series-2)','Bronze'],['Glass · 192 pieces','var(--viz-series-3)','Glass'],['Hydrite · 2304','var(--viz-series-4)','Hydrite'],['Verdite · 2304','var(--viz-series-5)','Verdite'],['Vitraleaf · 96 + 288 plants','var(--green)','Vitraleaf'],['Asterium · 32 fields','var(--purple)','Asterium'],['Vesperite · 32 fields','var(--yellow)','Vesperite'],['Sulphrite · 4 toxic fields','#e7e63b','Sulphrite']];
  const enabledKinds=new Set();
  const groupFor=p=>p.kind==='Flying enemy'?'Enemy':groups.find(g=>g[2]===p.kind)?.[2]||'Locations';
  const isVisible=p=>!['Skeleton','Danger sign'].includes(p.kind)&&(p.kind==='Base'||enabledKinds.has(groupFor(p)));
@@ -69,7 +69,7 @@ button,input{font:inherit;color:inherit;background:#0d2635;border:1px solid #3c6
   const key=kind||'Locations';checkbox.setAttribute('aria-label',label);
   checkbox.addEventListener('change',()=>{if(checkbox.checked)enabledKinds.add(key);else enabledKinds.delete(key);if(selected&&!isVisible(selected)){selected=null;root.querySelector('.hp-detail').textContent=data.snapshot;}draw();});
   const dot=document.createElement('i');dot.style.setProperty('--mark',color);
-  if(['Iron','Bronze','Asterium','Vesperite'].includes(kind))dot.style.borderRadius='0';
+  if(['Iron','Bronze','Asterium','Vesperite','Sulphrite'].includes(kind))dot.style.borderRadius='0';
   if(kind==='Glass'){dot.style.borderRadius='0';dot.style.transform='rotate(45deg)';}
   if(key==='Locations')dot.style.clipPath='polygon(50% 0,100% 100%,0 100%)';
   e.append(checkbox,dot,document.createTextNode(label));root.querySelector('.hp-legend').append(e);
@@ -112,7 +112,7 @@ button,input{font:inherit;color:inherit;background:#0d2635;border:1px solid #3c6
   const label=make('text',{x:tx,y:ty,'text-anchor':'middle','paint-order':'stroke',stroke:'var(--background)','stroke-width':3,'data-feature':'marker-label'},field);label.textContent=text;
  };
  const ordered=data.points.filter(isVisible).sort((a,b)=>(groups.some(g=>g[2]===a.kind)?0:1)-(groups.some(g=>g[2]===b.kind)?0:1));
- for(const p of ordered){const x=sx(mx(p.x)),y=sy(p.y);if(x<L-10||x>R+10||y<T-10||y>B+10)continue;const res=['Hydrite','Verdite','Vitraleaf'].includes(p.kind),ore=['Iron','Bronze','Asterium','Vesperite'].includes(p.kind);const r=res?2:ore?5:p.kind==='Glass'?3:6;const a={'data-kind':p.kind,'data-world':p.x>=2000?'2':'1',fill:p.remaining?color(p):'var(--background)',stroke:color(p),'stroke-width':p.remaining?.7:1.4,opacity:res?.7:1};
+ for(const p of ordered){const x=sx(mx(p.x)),y=sy(p.y);if(x<L-10||x>R+10||y<T-10||y>B+10)continue;const res=['Hydrite','Verdite','Vitraleaf'].includes(p.kind),ore=['Iron','Bronze','Asterium','Vesperite','Sulphrite'].includes(p.kind);const r=res?2:ore?5:p.kind==='Glass'?3:6;const a={'data-kind':p.kind,'data-world':p.x>=2000?'2':'1',fill:p.remaining?color(p):'var(--background)',stroke:color(p),'stroke-width':p.remaining?.7:1.4,opacity:res?.7:1};
  if(ore)make('rect',{x:x-r,y:y-r,width:r*2,height:r*2,...a},field);else if(p.kind==='Glass')make('path',{d:`M${x} ${y-r}l${r} ${r}l${-r} ${r}l${-r} ${-r}Z`,...a},field);else if(res||p.kind==='Enemy'||p.kind==='Flying enemy')make('circle',{cx:x,cy:y,r,...a},field);else make('path',{d:`M${x} ${y-r-2}l${r+1} ${r*2+2}h${-2*r-2}Z`,...a},field);
  if((w>=600||half<1600||p.kind==='Base')&&(!(p.id>=100&&['Enemy','Flying enemy'].includes(p.kind))||half<600)&&!res&&!ore&&p.kind!=='Glass'&&(half<1600||['Base','Research','Future impact','Impact site','Tunnel 1','Enemy','Northwest outpost'].includes(p.kind))&&(half<600||!['Cache 1','Cache 2','Cache 3','Smelter','Player'].includes(p.kind))){markerLabel((names[p.kind]||p.kind)+(p.kind==='Settlement capsule'?' '+(p.id+1):''),x,y,p.kind.startsWith('Tunnel'));}
  }

@@ -7,7 +7,7 @@ for(const bad of ['','HS2-1','HS1-0','HS1--1','HS1-2147483648','HS1-1x'])assert.
 assert.equal(parseSeed(' hs1-42 '),42);
 for(const ref of references){
  const map=generateWorld(ref.seed,assets);
- assert.equal(map.points.length,ref.points.length+3456+64+96+192+46+map.points.filter(p=>p.kind==='Flying enemy').length,ref.seed+' doubled resource count');
+ assert.equal(map.points.length,ref.points.length+3456+64+96+192+51+map.points.filter(p=>p.kind==='Flying enemy').length,ref.seed+' doubled resource count');
  for(const [kind,id,oldX,y] of ref.points){
   const x=kind==='Tunnel 1'?assets.passMountains.west:kind==='Tunnel 2'?assets.passMountains.east:oldX;
   const point=map.points.find(p=>p.kind===kind&&p.id===id);
@@ -43,7 +43,7 @@ console.log('All 3808 added resource sites match Unreal within 2 cm.');
 
 for(const seed of ['HS1-1','HS1-42','HS1-123456789']){
  const p=generateWorld(seed,assets).points;
- assert.equal(p.filter(p=>p.kind==='Enemy').length,27);
+ assert.equal(p.filter(p=>p.kind==='Enemy').length,28);
  assert.equal(p.filter(p=>p.kind==='Settlement capsule').length,4);
  assert.equal(p.filter(p=>p.kind==='Settlement chest').length,1);
  assert.equal(p.filter(p=>p.kind==='Medical regulator').length,1);
@@ -95,3 +95,11 @@ assert.equal(southern.length,1);assert.equal(southern[0].x,4200);assert.equal(so
 
 for(const seed of [1,42,123456789]){const guards=generateWorld(`HS1-${seed}`,assets).points.filter(p=>p.kind==='Enemy'&&p.id>=700&&p.id<708);assert.equal(guards.length,8);for(const p of guards){assert.equal(p.remaining,170);assert.ok(Math.abs(Math.hypot(p.x-4200,p.y-1450)-30)<.02);}}
 console.log('Eight dormant Shardmaws are visible with 170 HP on every seed.');
+
+for(const seed of ['HS1-1','HS1-42','HS1-123456789']){
+ const points=generateWorld(seed,assets).points,fields=points.filter(p=>p.kind==='Sulphrite');
+ assert.equal(fields.length,4);assert.deepEqual(fields.map(p=>p.id),[128,129,130,131]);
+ for(let i=0;i<4;i++){assert.ok(Math.hypot(fields[i].x-4000,fields[i].y)<500);for(let j=0;j<i;j++)assert.ok(Math.hypot(fields[i].x-fields[j].x,fields[i].y-fields[j].y)>400);}
+ const guard=points.filter(p=>p.kind==='Enemy'&&p.id===708);assert.equal(guard.length,1);assert.equal(guard[0].remaining,340);
+}
+console.log('Four spaced central Sulphrite fields and one Ridgeback match every seed.');
