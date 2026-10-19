@@ -94,7 +94,12 @@ export function generateWorld(seedText,asset){
   begin=end;
  }
  for(let i=0;i<192;i++)plants.push(extra(plants[i],12000,190000));
- const points=asset.points.map(p=>({...p}));
+ const routeHouses=[0,1,2],routeKeys=[0,1,2,3,4],routeRandom=random(391);
+ for(let i=2;i>0;i--){const j=routeRandom.integer(0,i);[routeHouses[i],routeHouses[j]]=[routeHouses[j],routeHouses[i]];}if(routeHouses.join()==='0,1,2')[routeHouses[0],routeHouses[2]]=[routeHouses[2],routeHouses[0]];
+ routeHouses.unshift(5);routeHouses.push(3,4);
+ for(let i=4;i>0;i--){const j=routeRandom.integer(0,i);[routeKeys[i],routeKeys[j]]=[routeKeys[j],routeKeys[i]];}if(routeKeys.join()==='0,1,2,3,4')[routeKeys[0],routeKeys[4]]=[routeKeys[4],routeKeys[0]];
+ const points=asset.points.map(p=>{if(p.kind!=='Access key')return {...p};const house=routeHouses[routeKeys.indexOf(p.id)],cabin=asset.points.find(p=>p.kind==='Outpost cabin'&&p.id===house),sites=[[-240,-150,113],[-185,-150,113],[65,155,56],[-55,155,56]],offset=sites[random(392+p.id).integer(0,3)];const angle=([155,245,325,35,110,80][house]+new RandomStream(741989+house*7919).range(-17,17))*Math.PI/180;return {...p,x:cabin.x+(Math.cos(angle)*offset[0]-Math.sin(angle)*offset[1])/100,y:cabin.y+(Math.sin(angle)*offset[0]+Math.cos(angle)*offset[1])/100,z:cabin.z+offset[2]/100};});
+
  const add=(kind,p,id=0,remaining=1)=>points.push({kind,x:p.x/100,y:p.y/100,z:p.z/100,id,remaining});
  for(const [kind,p,id] of [['Cache 1',cache1,1],['Cache 2',cache2,2],['Cache 3',cache3,3],['Suit pod',suit,0],['Research',research,0],['Mining cache',mining,0]]){p.z=terrain.height(p);add(kind,p,id);}
  ores.forEach((p,i)=>add(i%64>=32?(i%2?'Vesperite':'Asterium'):(i%2?'Bronze':'Iron'),p,i,40));
@@ -127,5 +132,5 @@ export function generateWorld(seedText,asset){
   }
  };
  populate(302,28,false);populate(303,4,true);
- const {collision,...base}=asset;return {...base,points,worldSeed:seed,worldGeneratorVersion:1,seedId:`HS1-${seed}`,mapMode:'initial-world',snapshot:`Initial world · HS1-${seed} · no saved progress`};
+ const {collision,...base}=asset;return {...base,points,villageRoute:{houses:routeHouses,keys:routeKeys},worldSeed:seed,worldGeneratorVersion:1,seedId:`HS1-${seed}`,mapMode:'initial-world',snapshot:`Initial world · HS1-${seed} · no saved progress`};
 }

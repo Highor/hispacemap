@@ -45,3 +45,5 @@ Map orientation: north is up, east is right. Axes and selected marker details us
 Western wildlife extension: independent streams 302/303 append 28 groups of 1–3 stingers and four rare 340-HP ground creatures in World 2 west, avoiding mission sites. Original enemy IDs and positions remain intact. Fresh Unreal reference positions are checked within 2 cm.
 
 Pass geometry revision: the mountain pass is rendered from the actual closed mesh as ground-clipped polygons, separate from coarse terrain cells. The 5 m opening is centred at Y=0 and its 50 m throat has mouth markers at E 1975 / 2025. Former E 1900 / 2100 markers were approach waypoints. Module record and settlement coordinates remain unchanged; labels use leader lines when needed.
+
+Outpost keys use a reproducible shuffled route and surface positions per seed. The public map shows new-world key locations; already-started legacy saves keep their original route for compatibility. The drone and final cache rooms retain their late progression positions.

@@ -39,7 +39,7 @@ button,input{font:inherit;color:inherit;background:#0d2635;border:1px solid #3c6
 .hp-filter i{flex-shrink:0}
 </style>
  <script type="module">
- import {generateWorld} from "./generator.js?v=west-wildlife-2";
+ import {generateWorld} from "./generator.js?v=shuffled-keys-1";
  (async()=>{
  const root=document.getElementById('hispace-world-map'), svg=root.querySelector('.hp-map'), ns='http://www.w3.org/2000/svg';
  const response=await fetch('./assets/world-hs1.json?v=precise-pass-1');if(!response.ok)throw Error('Terrain could not be loaded. Please reload the page.');

@@ -77,3 +77,15 @@ for(const p of assets.passMountains.surface){assert.ok(p.xy.every(([x,y])=>Math.
 assert.deepEqual(expanded.points.filter(p=>p.kind==='Module record').map(p=>[p.x,p.y]),[[2129.6,25.2]]);
 assert.deepEqual(expanded.points.filter(p=>p.kind==='Settlement capsule').map(p=>[p.x,p.y]),[[2185,100],[2185,125],[2210,100],[2210,125]]);
 console.log('Actual pass mouths, 5 m gap and unchanged mission locations verified.');
+
+const routes=new Set();
+for(const seed of ['HS1-1','HS1-42','HS1-123456789','HS1-777777777']){
+ const map=generateWorld(seed,assets),{houses,keys}=map.villageRoute;
+ assert.equal(houses[0],5);assert.deepEqual(houses.slice(-2),[3,4]);assert.equal(new Set(houses).size,6);assert.equal(new Set(keys).size,5);assert.notEqual(houses.slice(1,4).join(),'0,1,2');assert.notEqual(keys.join(),'0,1,2,3,4');routes.add(houses.join()+keys.join());
+ for(let i=0;i<5;i++){const key=map.points.find(p=>p.kind==='Access key'&&p.id===keys[i]),house=map.points.find(p=>p.kind==='Outpost cabin'&&p.id===houses[i]);assert.ok(Math.hypot(key.x-house.x,key.y-house.y)<3);}
+}
+assert.ok(routes.size>1);console.log('Seeded key routes are nonsequential, solvable and preserve late rewards.');
+
+const nativeKeys=JSON.parse(readFileSync(new URL('./shuffled-keys-reference.json',import.meta.url)));
+for(const [id,x,y,z] of nativeKeys){const p=expanded.points.find(p=>p.kind==='Access key'&&p.id===id);assert.ok(p&&Math.hypot(p.x-x,p.y-y)<.02&&Math.abs(p.z-z)<.02,`Shuffled key ${id} differs from Unreal`);}
+console.log('Seeded key placements match fresh Unreal export within 2 cm.');
