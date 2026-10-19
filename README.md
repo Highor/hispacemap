@@ -2,8 +2,8 @@
 
 Browser-only map generator for Hispace. Hosted at https://hispacemap.highor.com.
 
-Enter the `HS1-Ã¢â‚¬Â¦` seed displayed in a game save/load slot. Generation updates
-`?seedid=HS1-Ã¢â‚¬Â¦`; bookmark or share that URL to reopen the same map. No server-side
+Enter the `HS1-…` seed displayed in a game save/load slot. Generation updates
+`?seedid=HS1-…`; bookmark or share that URL to reopen the same map. No server-side
 generation, Unreal installation, user account or uploaded save is required.
 
 The map shows the initial world. Buildings, depletion, respawned resources and
@@ -25,7 +25,7 @@ for incompatible game/terrain changes.
 
 The public assets contain only authored terrain, fixed initial marker geometry and
 Oxanium fonts. Font license: assets/OFL.txt. No player save, secret, engine binary
-or private project repository is included. Site and game map assets Ã‚Â© Highor.
+or private project repository is included. Site and game map assets © Highor.
 
 GitHub Pages publishes the root of main. CNAME points to hispacemap.highor.com;
 the DNS CNAME should point to highor.github.io.

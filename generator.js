@@ -127,5 +127,5 @@ export function generateWorld(seedText,asset){
   }
  };
  populate(302,28,false);populate(303,4,true);
- const {collision,...base}=asset;return {...base,points,worldSeed:seed,worldGeneratorVersion:1,seedId:`HS1-${seed}`,mapMode:'initial-world',snapshot:`Initial world Â· HS1-${seed} Â· no saved progress`};
+ const {collision,...base}=asset;return {...base,points,worldSeed:seed,worldGeneratorVersion:1,seedId:`HS1-${seed}`,mapMode:'initial-world',snapshot:`Initial world · HS1-${seed} · no saved progress`};
 }
