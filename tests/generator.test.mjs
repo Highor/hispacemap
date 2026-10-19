@@ -7,7 +7,7 @@ for(const bad of ['','HS2-1','HS1-0','HS1--1','HS1-2147483648','HS1-1x'])assert.
 assert.equal(parseSeed(' hs1-42 '),42);
 for(const ref of references){
  const map=generateWorld(ref.seed,assets);
- assert.equal(map.points.length,ref.points.length+3456+64+96+192+37+map.points.filter(p=>p.kind==='Flying enemy').length,ref.seed+' doubled resource count');
+ assert.equal(map.points.length,ref.points.length+3456+64+96+192+38+map.points.filter(p=>p.kind==='Flying enemy').length,ref.seed+' doubled resource count');
  for(const [kind,id,oldX,y] of ref.points){
   const x=kind==='Tunnel 1'?assets.passMountains.west:kind==='Tunnel 2'?assets.passMountains.east:oldX;
   const point=map.points.find(p=>p.kind===kind&&p.id===id);
@@ -89,3 +89,6 @@ assert.ok(routes.size>1);console.log('Seeded key routes are nonsequential, solva
 const nativeKeys=JSON.parse(readFileSync(new URL('./shuffled-keys-reference.json',import.meta.url)));
 for(const [id,x,y,z] of nativeKeys){const p=expanded.points.find(p=>p.kind==='Access key'&&p.id===id);assert.ok(p&&Math.hypot(p.x-x,p.y-y)<.02&&Math.abs(p.z-z)<.02,`Shuffled key ${id} differs from Unreal`);}
 console.log('Seeded key placements match fresh Unreal export within 2 cm.');
+
+const southern=generateWorld(123456789,assets).points.filter(p=>p.kind==='Southern crash field');
+assert.equal(southern.length,1);assert.equal(southern[0].x,4200);assert.equal(southern[0].y,1450);
