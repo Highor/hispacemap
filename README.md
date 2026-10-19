@@ -43,3 +43,5 @@ World 2 relief revision 1 adds broad walkable basalt hills and valleys. This upd
 Map orientation: north is up, east is right. Axes and selected marker details use E = X/100 and N = -Y/100, matching the game. Terrain cell edges and pan input share this orientation. Skeletons and danger signs are omitted from Locations and cannot be selected.
 
 Western wildlife extension: independent streams 302/303 append 28 groups of 1–3 stingers and four rare 340-HP ground creatures in World 2 west, avoiding mission sites. Original enemy IDs and positions remain intact. Fresh Unreal reference positions are checked within 2 cm.
+
+Pass geometry revision: the mountain pass is rendered from the actual closed mesh as ground-clipped polygons, separate from coarse terrain cells. The 5 m opening is centred at Y=0 and its 50 m throat has mouth markers at E 1975 / 2025. Former E 1900 / 2100 markers were approach waypoints. Module record and settlement coordinates remain unchanged; labels use leader lines when needed.

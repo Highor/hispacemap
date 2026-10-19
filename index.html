@@ -42,7 +42,7 @@ button,input{font:inherit;color:inherit;background:#0d2635;border:1px solid #3c6
  import {generateWorld} from "./generator.js?v=west-wildlife-2";
  (async()=>{
  const root=document.getElementById('hispace-world-map'), svg=root.querySelector('.hp-map'), ns='http://www.w3.org/2000/svg';
- const response=await fetch('./assets/world-hs1.json?v=world-two-relief-1');if(!response.ok)throw Error('Terrain could not be loaded. Please reload the page.');
+ const response=await fetch('./assets/world-hs1.json?v=precise-pass-1');if(!response.ok)throw Error('Terrain could not be loaded. Please reload the page.');
  const asset=await response.json();
  const requested=new URLSearchParams(location.search).get('seedid')||new URLSearchParams(location.search).get('seed')||'HS1-123456789';
  let initialError='';let data;try{data=generateWorld(requested,asset);}catch(error){initialError=error.message;data=generateWorld('HS1-123456789',asset);}
@@ -91,9 +91,12 @@ button,input{font:inherit;color:inherit;background:#0d2635;border:1px solid #3c6
   make('circle',{cx:sx(4000),cy:sy(0),r:2000*scale,fill:'none',stroke:'var(--border)','stroke-width':1,'data-region':'world-two'},field);
   const name=make('text',{x:sx(4000),y:Math.max(T+18,sy(-2350)),'text-anchor':'middle','font-weight':'bold'},field);name.textContent=w<600?'WORLD 2':'WORLD 2 · 2 km RADIUS';
   const subtitle=make('text',{x:sx(4000),y:Math.min(B-6,sy(2350)),'text-anchor':'middle'},field);subtitle.textContent=w<600?'288 Vitraleaf':'288 Vitraleaf · enclosing mountains';
-  make('line',{x1:sx(1900),y1:sy(0),x2:sx(2100),y2:sy(0),stroke:'var(--viz-series-6)','stroke-width':2},field);
-  const link=make('text',{x:sx(2000),y:sy(0)+30,'text-anchor':'middle','font-size':10},field);link.textContent='OPEN PASS · 200 m';
+
  }
+ // Actual authored mountain polygons preserve the 5 m opening at every zoom level.
+ for(const polygon of data.passMountains?.surface||[]){const xy=polygon.xy.map(([x,y])=>[sx(x),sy(y)]);if(Math.max(...xy.map(p=>p[0]))<L||Math.min(...xy.map(p=>p[0]))>R||Math.max(...xy.map(p=>p[1]))<T||Math.min(...xy.map(p=>p[1]))>B)continue;make('path',{d:'M'+xy.map(p=>p.join(' ')).join('L')+'Z',fill:'var(--foreground)',opacity:.025+Math.min(Math.max(polygon.height,0)/200,1)*.19,'data-feature':'pass-mountain'},field);}
+  const pass=data.passMountains||{},west=pass.west??1975,east=pass.east??2025;make('line',{x1:sx(west),y1:sy(0),x2:sx(east),y2:sy(0),stroke:'var(--viz-series-6)','stroke-width':Math.max(1.5,5*scale),'data-feature':'pass-centreline'},field);
+  const link=make('text',{x:sx(2000),y:sy(0)+30,'text-anchor':'middle','font-size':10},field);link.textContent='OPEN PASS · '+Math.round(east-west)+' m';
  const region=make('text',{x:sx(0),y:Math.max(T+18,sy(-2350)),'text-anchor':'middle','font-weight':'bold'},field);region.textContent=w<600?'WORLD 1':'WORLD 1 · STARTING BASIN';
  for(const radius of [300,500,1000,1500,2000]){make('circle',{cx:sx(0),cy:sy(0),r:radius*scale,'data-region':radius===2000?'world-one':'',fill:'none',stroke:'var(--border)','stroke-width':1},field);if(sy(-radius)>T+14&&sy(-radius)<B-5){const t=make('text',{x:sx(0)+4,y:sy(-radius)-4},field);t.textContent=radius+' m';}}
  const step=w<600?(half>2000?5000:half>1000?2000:half>450?1000:half>150?200:100):(half>1000?1000:half>450?500:half>150?100:50);
@@ -101,10 +104,17 @@ button,input{font:inherit;color:inherit;background:#0d2635;border:1px solid #3c6
  for(let v=Math.ceil((cy-half)/step)*step;v<=cy+half;v+=step){make('line',{x1:L,x2:R,y1:sy(v),y2:sy(v),stroke:'var(--border)','stroke-width':.5},field);const t=make('text',{x:L-5,y:sy(v)+4,'text-anchor':'end'});t.textContent=-v;}
  const xt=make('text',{x:(L+R)/2,y:h-3,'text-anchor':'middle'});xt.textContent='E (metres) · both basins at the same scale';const yt=make('text',{x:L+5,y:T+15},field);yt.textContent='N (metres) · north up';
  for(const base of data.points.filter(p=>isVisible(p)&&(p.kind==='Base'||p.kind==='Small capsule')))make('circle',{cx:sx(mx(base.x)),cy:sy(base.y),r:50*scale,fill:'var(--viz-series-6)','fill-opacity':.2,stroke:'var(--viz-series-6)','stroke-opacity':.8,'stroke-width':1},field);
+ const occupied=[{left:sx(2000)-70,right:sx(2000)+70,top:sy(0)+18,bottom:sy(0)+34}];
+ const markerLabel=(text,x,y,below)=>{const width=Math.min(R-L,text.length*6.2),height=15;let chosen=null;
+  for(const dy of (below?[26,42,-15,-31,58,-47]:[-15,26,-31,42,-47,58,-63,74])){for(const dx of [0,-50,50,-100,100]){const left=Math.max(L+2,Math.min(R-width-2,x-width/2+dx)),top=y+dy-11;const box={left,top,right:left+width,bottom:top+height};if(top<T+2||box.bottom>B-2||occupied.some(o=>box.left<o.right+5&&box.right>o.left-5&&box.top<o.bottom+4&&box.bottom>o.top-4))continue;chosen=box;break;}if(chosen)break;}
+  if(!chosen)return;occupied.push(chosen);const tx=chosen.left+width/2,ty=chosen.top+11;
+  if(Math.abs(tx-x)>12||Math.abs(ty-y)>20)make('line',{x1:x,y1:y,x2:tx,y2:ty-4,stroke:'var(--foreground)','stroke-width':.65,opacity:.45,'data-feature':'label-leader'},field);
+  const label=make('text',{x:tx,y:ty,'text-anchor':'middle','paint-order':'stroke',stroke:'var(--background)','stroke-width':3,'data-feature':'marker-label'},field);label.textContent=text;
+ };
  const ordered=data.points.filter(isVisible).sort((a,b)=>(groups.some(g=>g[2]===a.kind)?0:1)-(groups.some(g=>g[2]===b.kind)?0:1));
  for(const p of ordered){const x=sx(mx(p.x)),y=sy(p.y);if(x<L-10||x>R+10||y<T-10||y>B+10)continue;const res=['Hydrite','Verdite','Vitraleaf'].includes(p.kind),ore=['Iron','Bronze','Asterium','Vesperite'].includes(p.kind);const r=res?2:ore?5:p.kind==='Glass'?3:6;const a={'data-kind':p.kind,'data-world':p.x>=2000?'2':'1',fill:p.remaining?color(p):'var(--background)',stroke:color(p),'stroke-width':p.remaining?.7:1.4,opacity:res?.7:1};
  if(ore)make('rect',{x:x-r,y:y-r,width:r*2,height:r*2,...a},field);else if(p.kind==='Glass')make('path',{d:`M${x} ${y-r}l${r} ${r}l${-r} ${r}l${-r} ${-r}Z`,...a},field);else if(res||p.kind==='Enemy'||p.kind==='Flying enemy')make('circle',{cx:x,cy:y,r,...a},field);else make('path',{d:`M${x} ${y-r-2}l${r+1} ${r*2+2}h${-2*r-2}Z`,...a},field);
- if((w>=600||half<1600||p.kind==='Base')&&(!(p.id>=100&&['Enemy','Flying enemy'].includes(p.kind))||half<600)&&!res&&!ore&&p.kind!=='Glass'&&(half<1600||['Base','Research','Future impact','Impact site','Tunnel 1','Enemy','Northwest outpost'].includes(p.kind))&&(half<600||!['Cache 1','Cache 2','Cache 3','Smelter','Player'].includes(p.kind))){const t=make('text',{x:Math.min(R-8,Math.max(L+8,x)),y:y+(p.kind.startsWith('Tunnel')?19:-11),'text-anchor':x>R-110?'end':x<L+100?'start':'middle','paint-order':'stroke',stroke:'var(--background)','stroke-width':3},field);t.textContent=names[p.kind]||p.kind;}
+ if((w>=600||half<1600||p.kind==='Base')&&(!(p.id>=100&&['Enemy','Flying enemy'].includes(p.kind))||half<600)&&!res&&!ore&&p.kind!=='Glass'&&(half<1600||['Base','Research','Future impact','Impact site','Tunnel 1','Enemy','Northwest outpost'].includes(p.kind))&&(half<600||!['Cache 1','Cache 2','Cache 3','Smelter','Player'].includes(p.kind))){markerLabel((names[p.kind]||p.kind)+(p.kind==='Settlement capsule'?' '+(p.id+1):''),x,y,p.kind.startsWith('Tunnel'));}
  }
  if(selected){make('circle',{cx:sx(mx(selected.x)),cy:sy(selected.y),r:12,fill:'none',stroke:'var(--foreground)','stroke-width':2},field);}
  make('rect',{x:L,y:T,width:R-L,height:B-T,fill:'none',stroke:'var(--border)'});

@@ -8,7 +8,8 @@ assert.equal(parseSeed(' hs1-42 '),42);
 for(const ref of references){
  const map=generateWorld(ref.seed,assets);
  assert.equal(map.points.length,ref.points.length+3456+64+96+192+37+map.points.filter(p=>p.kind==='Flying enemy').length,ref.seed+' doubled resource count');
- for(const [kind,id,x,y] of ref.points){
+ for(const [kind,id,oldX,y] of ref.points){
+  const x=kind==='Tunnel 1'?assets.passMountains.west:kind==='Tunnel 2'?assets.passMountains.east:oldX;
   const point=map.points.find(p=>p.kind===kind&&p.id===id);
   // Static enemy markers intentionally share id 0; validate their geometry by nearest point.
   const candidates=map.points.filter(p=>p.kind===kind&&(kind==='Enemy'||p.id===id));
@@ -69,3 +70,10 @@ console.log('Expanded west wildlife density and mission exclusion checks passed.
 const wildlife=JSON.parse(readFileSync(new URL('./west-wildlife-reference.json',import.meta.url)));
 for(const [kind,id,x,y,hp] of wildlife){const p=expanded.points.find(p=>p.kind===kind&&p.id===id);assert.ok(p&&Math.hypot(p.x-x,p.y-y)<.02&&p.remaining===hp,`Western wildlife ${kind} ${id} differs from Unreal`);}
 console.log('Western wildlife matches fresh Unreal positions within 2 cm.');
+
+assert.equal(assets.passMountains.west,1975);assert.equal(assets.passMountains.east,2025);assert.equal(assets.passMountains.lengthMetres,50);
+assert.ok(assets.passMountains.surface.length>2000);
+for(const p of assets.passMountains.surface){assert.ok(p.xy.every(([x,y])=>Math.abs(y)>=2.4999),'Mountain triangles preserve the 5 m centre opening');}
+assert.deepEqual(expanded.points.filter(p=>p.kind==='Module record').map(p=>[p.x,p.y]),[[2129.6,25.2]]);
+assert.deepEqual(expanded.points.filter(p=>p.kind==='Settlement capsule').map(p=>[p.x,p.y]),[[2185,100],[2185,125],[2210,100],[2210,125]]);
+console.log('Actual pass mouths, 5 m gap and unchanged mission locations verified.');
