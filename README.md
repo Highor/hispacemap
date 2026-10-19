@@ -2,8 +2,8 @@
 
 Browser-only map generator for Hispace. Hosted at https://hispacemap.highor.com.
 
-Enter the `HS1-…` seed displayed in a game save/load slot. Generation updates
-`?seedid=HS1-…`; bookmark or share that URL to reopen the same map. No server-side
+Enter the `HS1-â€¦` seed displayed in a game save/load slot. Generation updates
+`?seedid=HS1-â€¦`; bookmark or share that URL to reopen the same map. No server-side
 generation, Unreal installation, user account or uploaded save is required.
 
 The map shows the initial world. Buildings, depletion, respawned resources and
@@ -25,7 +25,7 @@ for incompatible game/terrain changes.
 
 The public assets contain only authored terrain, fixed initial marker geometry and
 Oxanium fonts. Font license: assets/OFL.txt. No player save, secret, engine binary
-or private project repository is included. Site and game map assets © Highor.
+or private project repository is included. Site and game map assets Â© Highor.
 
 GitHub Pages publishes the root of main. CNAME points to hispacemap.highor.com;
 the DNS CNAME should point to highor.github.io.
@@ -39,3 +39,5 @@ The main base is always visible and selectable, independently of the Locations c
 Hydrite/Verdite: 2,304 pickups of each type, 4,608 total. Original HS1 IDs 0-1151 and all unrelated resources remain unchanged. Three independently placed groups duplicate every original group's 1-3 pickup composition. This doubles the previous count of both pickups and locations (for HS1-123456789: 1,362 to 2,724 locations). The first added batch retains its 50 m separation; later added groups are at least 40 m from prior locations. Seven-seed tests cover counts, composition, spacing and repeatability, with new coordinates matched to Unreal.
 
 World 2 relief revision 1 adds broad walkable basalt hills and valleys. This updates authored ground heights without changing any HS1 resource XY/ID placements, as checked against all existing reference seeds. Display heights and collision queries use the same regenerated mesh. Generator test counts now include the existing northwest outpost, its eight ground enemies and ten flying enemies.
+
+Map orientation: north is up, east is right. Axes and selected marker details use E = X/100 and N = -Y/100, matching the game. Terrain cell edges and pan input share this orientation. Skeletons and danger signs are omitted from Locations and cannot be selected.
