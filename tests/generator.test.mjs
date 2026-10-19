@@ -7,7 +7,7 @@ for(const bad of ['','HS2-1','HS1-0','HS1--1','HS1-2147483648','HS1-1x'])assert.
 assert.equal(parseSeed(' hs1-42 '),42);
 for(const ref of references){
  const map=generateWorld(ref.seed,assets);
- assert.equal(map.points.length,ref.points.length+3456+64+96+192+51+map.points.filter(p=>p.kind==='Flying enemy').length,ref.seed+' doubled resource count');
+ assert.equal(map.points.length,ref.points.length+3456+64+96+192+55+map.points.filter(p=>p.kind==='Enemy'&&p.id>=800).length+map.points.filter(p=>p.kind==='Flying enemy').length,ref.seed+' doubled resource count');
  for(const [kind,id,oldX,y] of ref.points){
   const x=kind==='Tunnel 1'?assets.passMountains.west:kind==='Tunnel 2'?assets.passMountains.east:oldX;
   const point=map.points.find(p=>p.kind===kind&&p.id===id);
@@ -43,7 +43,7 @@ console.log('All 3808 added resource sites match Unreal within 2 cm.');
 
 for(const seed of ['HS1-1','HS1-42','HS1-123456789']){
  const p=generateWorld(seed,assets).points;
- assert.equal(p.filter(p=>p.kind==='Enemy').length,28);
+ assert.equal(p.filter(p=>p.kind==='Enemy'&&p.id<800).length,28);
  assert.equal(p.filter(p=>p.kind==='Settlement capsule').length,4);
  assert.equal(p.filter(p=>p.kind==='Settlement chest').length,1);
  assert.equal(p.filter(p=>p.kind==='Medical regulator').length,1);
@@ -103,3 +103,13 @@ for(const seed of ['HS1-1','HS1-42','HS1-123456789']){
  const guard=points.filter(p=>p.kind==='Enemy'&&p.id===708);assert.equal(guard.length,1);assert.equal(guard[0].remaining,340);
 }
 console.log('Four spaced central Sulphrite fields and one Ridgeback match every seed.');
+
+for(const seed of ['HS1-1','HS1-42','HS1-123456789']){
+ const p=generateWorld(seed,assets).points;assert.equal(p.filter(p=>p.kind==='Asterion Spire').length,1);
+ for(let room=0;room<40;room++){const enemies=p.filter(q=>q.kind==='Enemy'&&q.id>=800+room*4&&q.id<804+room*4);assert.ok(enemies.length>=1&&enemies.length<=4);assert.ok(enemies.every(q=>q.remaining===272));}
+ assert.equal(p.filter(p=>p.kind==='Cargo module').length,1);assert.equal(p.filter(p=>p.kind==='Survey module').length,1);
+}
+console.log('Asterion Spire: forty room packs, seeded modules and loot verified.');
+
+const towerReference=JSON.parse(readFileSync(new URL('./tower-reference.json',import.meta.url)));for(const q of towerReference){const p=expanded.points.find(p=>p.kind===q.kind&&p.id===q.id);assert.ok(p&&Math.hypot(p.x-q.x,p.y-q.y,p.z-q.z)<.025,'Tower placement differs from native: '+q.kind+' '+q.id);}
+console.log('Native tower enemy seats, loot and both random modules match within 2.5cm.');
