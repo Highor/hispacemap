@@ -7,7 +7,7 @@ for(const bad of ['','HS2-1','HS1-0','HS1--1','HS1-2147483648','HS1-1x'])assert.
 assert.equal(parseSeed(' hs1-42 '),42);
 for(const ref of references){
  const map=generateWorld(ref.seed,assets);
- assert.equal(map.points.length,ref.points.length+3456+64+96+192+59+map.points.filter(p=>p.kind==='Enemy'&&p.id>=800).length+map.points.filter(p=>p.kind==='Flying enemy').length+map.points.filter(p=>['Abandoned house','Cabin medkit'].includes(p.kind)).length,ref.seed+' doubled resource count');
+ assert.equal(map.points.length,ref.points.length+1+3456+64+96+192+59+map.points.filter(p=>p.kind==='Enemy'&&p.id>=800).length+map.points.filter(p=>p.kind==='Flying enemy').length+map.points.filter(p=>['Abandoned house','Cabin medkit'].includes(p.kind)).length,ref.seed+' doubled resource count');
  for(const [kind,id,oldX,y] of ref.points){
   const x=kind==='Tunnel 1'?assets.passMountains.west:kind==='Tunnel 2'?assets.passMountains.east:oldX;
   const point=map.points.find(p=>p.kind===kind&&p.id===id);
@@ -127,3 +127,5 @@ console.log('Native tower enemy seats, loot and both random modules match within
 for(const seed of ['HS1-123456789','HS1-42','HS1-987654321']){const map=generateWorld(seed,assets),kits=map.points.filter(p=>p.kind==='Tower medkit'),tower=map.points.find(p=>p.kind==='Asterion Spire');assert.equal(kits.length,4);assert.equal(new Set(kits.map(p=>Math.floor((p.z-tower.z+.001)/4))).size,4);assert.ok(kits.every(p=>p.z<tower.z+36));}
 
 {const map=generateWorld('HS1-123456789',assets);for(const native of assets.points.filter(p=>p.kind==='Tower medkit')){const web=map.points.find(p=>p.kind===native.kind&&p.id===native.id);assert.ok(Math.hypot(native.x-web.x,native.y-web.y,native.z-web.z)<.025,'Native medkit coordinate mismatch');}}
+
+const northNative=JSON.parse(readFileSync(new URL('./north-relay-reference.json',import.meta.url)));const northWeb=generateWorld('HS1-201026',assets).points.find(p=>p.kind==='North relay');assert.ok(Math.hypot(northNative.x-northWeb.x,northNative.y-northWeb.y,northNative.z-northWeb.z)<.025,'Northern solar house matches Unreal');for(const ref of references){const map=generateWorld(ref.seed,assets),relay=map.points.filter(p=>p.kind==='North relay');assert.equal(relay.length,1);assert.ok(relay[0].x>2200&&relay[0].y< -500);}console.log('Northern solar service house matches Unreal and exists once on every fixture seed.');

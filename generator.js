@@ -164,5 +164,13 @@ export function generateWorld(seedText,asset){
   const count=faunaR.integer(2,4),species=['Riftstalker','Prismback','Ashmaw','Duskmantis'][group%4],hp=[120,180,240,150][group%4];
   for(let member=0;member<count;member++){const angle=f(f(f(member*2)*PI)/count),p={x:centre.x+f(cos(angle)*300),y:centre.y+f(sin(angle)*300)};points.push({kind:'Enemy',species,pack:4000+group,id:1200+group*4+member,x:p.x/100,y:p.y/100,z:terrain.height(p)/100+[.6536,.6888,.9,.6888][group%4],remaining:hp});}
  }
+ const relayFoes=points.filter(p=>['Enemy','Flying enemy'].includes(p.kind)),relayResources=points.filter(p=>['Hydrite','Verdite','Vitraleaf','Glass'].includes(p.kind)),relayOres=points.filter(p=>['Iron','Bronze','Asterium','Vesperite'].includes(p.kind)),relayMissions=points.filter(p=>['Asterion Spire','Medical regulator','Southern crash field'].includes(p.kind));
+ const near=(p,q,r)=>Math.hypot(p.x-q.x*100,p.y-q.y*100)<r;
+ const relayClear=p=>p.x>=220000&&p.y<=-50000&&Math.hypot(p.x-400000,p.y)<=180000&&!relayMissions.some(q=>near(p,q,12000))&&!cabins.some(q=>distance(p,q)<3000)&&!relayFoes.some(q=>near(p,q,2500))&&!relayOres.some(q=>near(p,q,2000))&&!relayResources.some(q=>near(p,q,1000))&&terrain.valid(p,.94)&&[-350,350].every(x=>[-350,350].every(y=>Math.abs(terrain.height({x:p.x+x,y:p.y+y})-terrain.height(p))<=55));
+ let relay=null;
+ for(const foe of relayFoes){if(!foe.species||foe.y>-600)continue;for(const radius of [5000,7000]){for(let angle=0;angle<16;angle++){const a=f(angle*22.5*PI/180),p={x:f(foe.x*100+f(cos(a)*radius)),y:f(foe.y*100+f(sin(a)*radius))};if(relayClear(p)){relay=p;break;}}if(relay)break;}if(relay)break;}
+ if(!relay)throw Error('Could not place northern service house.');
+ let floor=terrain.height(relay);for(const x of [-150,150])for(const y of [-140,140])floor=Math.max(floor,terrain.height({x:relay.x+x,y:relay.y+y}));
+ points.push({kind:'North relay',id:0,x:relay.x/100,y:relay.y/100,z:(floor+5)/100,remaining:1});
  const {collision,...base}=asset;return {...base,points,villageRoute:{houses:routeHouses,keys:routeKeys},worldSeed:seed,worldGeneratorVersion:1,seedId:`HS1-${seed}`,mapMode:'initial-world',snapshot:`Initial world · HS1-${seed} · no saved progress`};
 }
