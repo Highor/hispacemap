@@ -7,7 +7,7 @@ export function parseSeed(text){const m=/^HS1-([1-9][0-9]{0,9})$/.exec(String(te
 export function subseed(seed,salt){let v=(seed^salt)>>>0;v=(v^(v>>>16))>>>0;v=Math.imul(v,0x7feb352d)>>>0;v=(v^(v>>>15))>>>0;v=Math.imul(v,0x846ca68b)>>>0;v=(v^(v>>>16))>>>0;return v%1000000+1;}
 export function towerMedkitOffsets(seed){
  const r=new RandomStream((subseed(seed,106)^0x5c17a3)|0),floors=[0,1,2,3,4,5,6,7,8],result=[];
- for(let i=0;i<4;i++){const pick=r.integer(0,floors.length-1),floor=floors.splice(pick,1)[0],room=floor*4+r.integer(0,3);result.push({x:(room%2?8.25:-8.25)+(r.integer(0,1)?1.8:-1.8),y:(Math.floor(room%4/2)?7.5:-7.5)+(r.integer(0,1)?1.5:-1.5),z:floor*4+.12});}return result;
+ for(let i=0;i<4;i++){const pick=r.integer(0,floors.length-1),floor=floors.splice(pick,1)[0],room=floor*4+r.integer(0,3);const y=r.integer(0,1)?1.5:-1.5,x=r.integer(0,1)?1.8:-1.8;result.push({x:(room%2?8.25:-8.25)+x,y:(Math.floor(room%4/2)?7.5:-7.5)+y,z:floor*4+.12});}return result;
 }
 export class RandomStream{
  constructor(seed){this.seed=seed>>>0;}

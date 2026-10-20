@@ -115,3 +115,5 @@ const towerReference=JSON.parse(readFileSync(new URL('./tower-reference.json',im
 console.log('Native tower enemy seats, loot and both random modules match within 2.5cm.');
 
 for(const seed of ['HS1-123456789','HS1-42','HS1-987654321']){const map=generateWorld(seed,assets),kits=map.points.filter(p=>p.kind==='Tower medkit'),tower=map.points.find(p=>p.kind==='Asterion Spire');assert.equal(kits.length,4);assert.equal(new Set(kits.map(p=>Math.floor((p.z-tower.z+.001)/4))).size,4);assert.ok(kits.every(p=>p.z<tower.z+36));}
+
+{const map=generateWorld('HS1-123456789',assets);for(const native of assets.points.filter(p=>p.kind==='Tower medkit')){const web=map.points.find(p=>p.kind===native.kind&&p.id===native.id);assert.ok(Math.hypot(native.x-web.x,native.y-web.y,native.z-web.z)<.025,'Native medkit coordinate mismatch');}}
