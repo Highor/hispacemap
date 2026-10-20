@@ -136,5 +136,15 @@ export function generateWorld(seedText,asset){
   }
  };
  populate(302,28,false);populate(303,4,true);
+ const houseBlockers=points.filter(p=>['Hydrite','Verdite','Vitraleaf','Glass','Iron','Bronze','Asterium','Vesperite','Sulphrite'].includes(p.kind));
+ const missionBlockers=points.filter(p=>['Research','Cache 1','Cache 2','Cache 3','Suit pod','Mining cache'].includes(p.kind));
+ for(let world=0;world<2;world++){let count=0;
+  for(const p of asset.abandonedCandidates||[]){if(p.world!==world||count>=24)continue;
+   if(houseBlockers.some(q=>Math.hypot(p.x-q.x,p.y-q.y)<9)||missionBlockers.some(q=>Math.hypot(p.x-q.x,p.y-q.y)<70))continue;
+   points.push({kind:'Abandoned house',id:world*24+count,x:p.x,y:p.y,z:p.z,remaining:1});
+   if(count===3||count===17){const a=p.yaw*Math.PI/180;points.push({kind:'Cabin medkit',id:world*2+(count===17?1:0),x:p.x-1.7*Math.cos(a)-Math.sin(a),y:p.y-1.7*Math.sin(a)+Math.cos(a),z:p.z+.24,remaining:1});}
+   count++;
+  }
+ }
  const {collision,...base}=asset;return {...base,points,villageRoute:{houses:routeHouses,keys:routeKeys},worldSeed:seed,worldGeneratorVersion:1,seedId:`HS1-${seed}`,mapMode:'initial-world',snapshot:`Initial world · HS1-${seed} · no saved progress`};
 }

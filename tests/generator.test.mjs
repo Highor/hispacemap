@@ -7,7 +7,7 @@ for(const bad of ['','HS2-1','HS1-0','HS1--1','HS1-2147483648','HS1-1x'])assert.
 assert.equal(parseSeed(' hs1-42 '),42);
 for(const ref of references){
  const map=generateWorld(ref.seed,assets);
- assert.equal(map.points.length,ref.points.length+3456+64+96+192+59+map.points.filter(p=>p.kind==='Enemy'&&p.id>=800).length+map.points.filter(p=>p.kind==='Flying enemy').length,ref.seed+' doubled resource count');
+ assert.equal(map.points.length,ref.points.length+3456+64+96+192+59+map.points.filter(p=>p.kind==='Enemy'&&p.id>=800).length+map.points.filter(p=>p.kind==='Flying enemy').length+map.points.filter(p=>['Abandoned house','Cabin medkit'].includes(p.kind)).length,ref.seed+' doubled resource count');
  for(const [kind,id,oldX,y] of ref.points){
   const x=kind==='Tunnel 1'?assets.passMountains.west:kind==='Tunnel 2'?assets.passMountains.east:oldX;
   const point=map.points.find(p=>p.kind===kind&&p.id===id);
@@ -34,6 +34,11 @@ for(const ref of references){
 }
 assert.notDeepEqual(generateWorld('HS1-1',assets).points,generateWorld('HS1-42',assets).points);
 console.log('HS1 generator checks passed.');
+const abandonedReference=JSON.parse(readFileSync(new URL('./abandoned-reference.json',import.meta.url)));
+const abandonedMap=generateWorld(abandonedReference.seed,assets);
+for(const ref of abandonedReference.points){const p=abandonedMap.points.find(p=>p.kind===ref.kind&&p.id===ref.id);assert.ok(p&&Math.hypot(p.x-ref.x,p.y-ref.y,p.z-ref.z)<.025,`Abandoned site ${ref.kind} ${ref.id} differs from Unreal`);}
+for(const ref of references){const m=generateWorld(ref.seed,assets),houses=m.points.filter(p=>p.kind==='Abandoned house');assert.equal(houses.filter(p=>p.x<2000).length,24);assert.equal(houses.filter(p=>p.x>=2000).length,24);assert.equal(m.points.filter(p=>p.kind==='Cabin medkit').length,4);}
+console.log('Abandoned houses and rare medkits match Unreal; 24 houses and two medkits per world across all fixture seeds.');
 
 const additions=JSON.parse(readFileSync(new URL('./resource-additions-reference.json',import.meta.url)));
 const expanded=generateWorld('HS1-123456789',assets);

@@ -39,10 +39,10 @@ button,input{font:inherit;color:inherit;background:#0d2635;border:1px solid #3c6
 .hp-filter i{flex-shrink:0}
 </style>
  <script type="module">
- import {generateWorld} from "./generator.js?v=asterion-1";
+ import {generateWorld} from "./generator.js?v=abandoned-1";
  (async()=>{
  const root=document.getElementById('hispace-world-map'), svg=root.querySelector('.hp-map'), ns='http://www.w3.org/2000/svg';
- const response=await fetch('./assets/world-hs1.json?v=asterion-1');if(!response.ok)throw Error('Terrain could not be loaded. Please reload the page.');
+ const response=await fetch('./assets/world-hs1.json?v=abandoned-1');if(!response.ok)throw Error('Terrain could not be loaded. Please reload the page.');
  const asset=await response.json();
  const requested=new URLSearchParams(location.search).get('seedid')||new URLSearchParams(location.search).get('seed')||'HS1-123456789';
  let initialError='';let data;try{data=generateWorld(requested,asset);}catch(error){initialError=error.message;data=generateWorld('HS1-123456789',asset);}

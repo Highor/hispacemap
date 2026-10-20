@@ -27,6 +27,12 @@ The public assets contain only authored terrain, fixed initial marker geometry a
 Oxanium fonts. Font license: assets/OFL.txt. No player save, secret, engine binary
 or private project repository is included. Site and game map assets © Highor.
 
+Abandoned architecture adds 24 walk-in houses per basin, selected from authored
+terrain-validated candidates while keeping clear of seeded resources and recovery
+sites. Only two houses per basin contain a single medkit. The Locations filter
+shows these initial placements; saved pickup depletion remains separate. The
+native `abandoned-reference.json` fixture checks all 52 sites within 2.5 cm.
+
 GitHub Pages publishes the root of main. CNAME points to hispacemap.highor.com;
 the DNS CNAME should point to highor.github.io.
 
