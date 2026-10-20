@@ -3,12 +3,15 @@ import {readFileSync} from 'node:fs';
 import {generateWorld,parseSeed,RandomStream,Terrain} from '../generator.js';
 const assets=JSON.parse(readFileSync(new URL('../assets/world-hs1.json',import.meta.url)));
 const references=JSON.parse(readFileSync(new URL('./hs1-reference.json',import.meta.url)));
+const thirdWorldReferences=JSON.parse(readFileSync(new URL('./world-three-reference.json',import.meta.url)));
 for(const bad of ['','HS2-1','HS1-0','HS1--1','HS1-2147483648','HS1-1x'])assert.throws(()=>parseSeed(bad));
 assert.equal(parseSeed(' hs1-42 '),42);
 for(const ref of references){
  const map=generateWorld(ref.seed,assets);
- assert.equal(map.points.length,ref.points.length+1+3456+64+96+192+59+map.points.filter(p=>p.kind==='Enemy'&&p.id>=800).length+map.points.filter(p=>p.kind==='Flying enemy').length+map.points.filter(p=>['Abandoned house','Cabin medkit'].includes(p.kind)).length,ref.seed+' doubled resource count');
+ assert.equal(map.points.length,ref.points.length+5+3456+64+96+192+59+map.points.filter(p=>p.kind==='Enemy'&&p.id>=800).length+map.points.filter(p=>p.kind==='Flying enemy').length+map.points.filter(p=>['Abandoned house','Cabin medkit'].includes(p.kind)).length,ref.seed+' doubled resource count');
  for(const [kind,id,oldX,y] of ref.points){
+  // Opening the eastern ridge changes slope-based World 2 vegetation selection.
+  if(kind==='Vitraleaf'&&id>=48)continue;
   const x=kind==='Tunnel 1'?assets.passMountains.west:kind==='Tunnel 2'?assets.passMountains.east:oldX;
   const point=map.points.find(p=>p.kind===kind&&p.id===id);
   // Static enemy markers intentionally share id 0; validate their geometry by nearest point.
@@ -32,6 +35,17 @@ for(const ref of references){
  assert.deepEqual(generateWorld(ref.seed,assets),map,'repeatability');
  console.log(ref.seed+': original HS1 placements retained; '+originalGroups.length+' original + '+addedGroups.length+' new mineral locations');
 }
+assert.equal(assets.collision.length,3);
+for(const ref of thirdWorldReferences){
+ const map=generateWorld(ref.seed,assets);
+ for(const expected of ref.points){const actual=map.points.find(p=>p.kind===expected.kind&&p.id===expected.id);assert.ok(actual&&Math.hypot(actual.x-expected.x,actual.y-expected.y,actual.z-expected.z)<.025,`${ref.seed}: ${expected.kind} ${expected.id} differs from current Unreal terrain`);}
+ for(const kind of ['Teleport cache','Teleport receiver','World 3 pass west','World 3 pass east'])assert.equal(map.points.filter(p=>p.kind===kind).length,1);
+ assert.ok(map.points.filter(p=>p.kind==='Danger sign').every(p=>p.x<3000));
+ const terrain=new Terrain(assets.collision);
+ for(let x=597500;x<=606000;x+=250){const hit=terrain.hit({x,y:0});assert.ok(hit&&Math.abs(hit.z-2000)<2&&hit.normal>.94,'World 3 tunnel terrain is continuous');}
+ assert.equal(map.worldThree.centerX,8000);assert.equal(map.worldThreePass.lengthMetres,50);
+}
+console.log('World 3 terrain, unsigned pass, one sender cache and receiver match current native exports.');
 assert.notDeepEqual(generateWorld('HS1-1',assets).points,generateWorld('HS1-42',assets).points);
 console.log('HS1 generator checks passed.');
 const abandonedReference=JSON.parse(readFileSync(new URL('./abandoned-reference.json',import.meta.url)));

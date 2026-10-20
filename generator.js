@@ -19,9 +19,10 @@ const cell=(axis,value)=>{let lo=0,hi=axis.length-1;while(lo+1<hi){const mid=(lo
 export class Terrain{
  constructor(grids){this.grids=grids;}
  hit(p){
-  const second=p.x>=200000&&p.x<=650000&&Math.abs(p.y)<=250000;
-  if(!second&&(Math.abs(p.x)>250000||Math.abs(p.y)>250000))return null;
-  const g=this.grids[second?1:0],x=p.x-(second?400000:0),y=p.y;
+  const second=p.x>=200000&&p.x<600000&&Math.abs(p.y)<=250000;
+  const third=p.x>=600000&&p.x<=1050000&&Math.abs(p.y)<=250000;
+  if(!second&&!third&&(Math.abs(p.x)>250000||Math.abs(p.y)>250000))return null;
+  const g=this.grids[third?2:second?1:0],x=p.x-(third?800000:second?400000:0),y=p.y;
   if(x<g.xs[0]||x>g.xs.at(-1)||y<g.ys[0]||y>g.ys.at(-1))return null;
   const i=cell(g.xs,x),j=cell(g.ys,y),n=g.xs.length;
   const dx=g.xs[i+1]-g.xs[i],dy=g.ys[j+1]-g.ys[j],u=(x-g.xs[i])/dx,v=(y-g.ys[j])/dy;
