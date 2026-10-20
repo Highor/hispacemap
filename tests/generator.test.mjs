@@ -39,6 +39,11 @@ const abandonedMap=generateWorld(abandonedReference.seed,assets);
 for(const ref of abandonedReference.points){const p=abandonedMap.points.find(p=>p.kind===ref.kind&&p.id===ref.id);assert.ok(p&&Math.hypot(p.x-ref.x,p.y-ref.y,p.z-ref.z)<.025,`Abandoned site ${ref.kind} ${ref.id} differs from Unreal`);}
 for(const ref of references){const m=generateWorld(ref.seed,assets),houses=m.points.filter(p=>p.kind==='Abandoned house');assert.equal(houses.filter(p=>p.x<2000).length,24);assert.equal(houses.filter(p=>p.x>=2000).length,24);assert.equal(m.points.filter(p=>p.kind==='Cabin medkit').length,4);}
 console.log('Abandoned houses and rare medkits match Unreal; 24 houses and two medkits per world across all fixture seeds.');
+const faunaReference=JSON.parse(readFileSync(new URL('./fauna-reference.json',import.meta.url)));
+const faunaMap=generateWorld(faunaReference.seed,assets);
+for(const ref of faunaReference.points){const p=faunaMap.points.find(p=>p.kind==='Enemy'&&p.id===ref.id);assert.ok(p&&Math.hypot(p.x-ref.x,p.y-ref.y)<.025&&p.species===ref.species&&p.pack===ref.pack&&p.remaining===ref.remaining,`Fauna ${ref.species} ${ref.id} differs from Unreal`);}
+for(const ref of references){const fauna=generateWorld(ref.seed,assets).points.filter(p=>p.id>=1200&&p.kind==='Enemy'),packs=new Map();for(const p of fauna){assert.ok(p.x>2000);packs.set(p.pack,(packs.get(p.pack)||0)+1);}assert.equal(packs.size,16);assert.ok([...packs.values()].every(n=>n>=2&&n<=4));for(const species of ['Riftstalker','Prismback','Ashmaw','Duskmantis'])assert.equal(new Set(fauna.filter(p=>p.species===species).map(p=>p.pack)).size,4);}
+console.log('Four new fauna species: native positions, HP, IDs and pack membership match; every fixture has sixteen packs of two to four.');
 
 const additions=JSON.parse(readFileSync(new URL('./resource-additions-reference.json',import.meta.url)));
 const expanded=generateWorld('HS1-123456789',assets);

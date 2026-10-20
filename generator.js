@@ -146,5 +146,23 @@ export function generateWorld(seedText,asset){
    count++;
   }
  }
+ const faunaR=random(827),faunaCentres=[],oldFoes=points.filter(p=>['Enemy','Flying enemy'].includes(p.kind));
+ const faunaMissions=points.filter(p=>['Medical regulator','Southern crash field','Asterion Spire','Outpost cabin'].includes(p.kind)).map(p=>({x:p.x*100,y:p.y*100}));
+ faunaMissions.push({x:213000,y:2600},{x:200000,y:0});
+ const settlement=points.filter(p=>p.kind==='Settlement capsule').map(p=>({x:p.x*100,y:p.y*100}));
+ const cabins=points.filter(p=>p.kind==='Abandoned house').map(p=>({x:p.x*100,y:p.y*100}));
+ for(let group=0;group<16;group++){
+  let centre=null;
+  for(let attempt=0;attempt<5000;attempt++){
+   const p={x:f(faunaR.range(group<8?225000:405000,group<8?395000:575000)),y:f(faunaR.range(-165000,165000))};
+   if(Math.hypot(p.x-400000,p.y)>175000||faunaMissions.some(q=>distance(p,q)<18000)||settlement.some(q=>distance(p,q)<12000)||cabins.some(q=>distance(p,q)<4000)||oldFoes.some(q=>Math.hypot(p.x-q.x*100,p.y-q.y*100)<4500)||faunaCentres.some(q=>distance(p,q)<18000)||!terrain.valid(p,.9))continue;
+   let clear=true;const ground=terrain.height(p);
+   for(let side=0;side<8;side++){const angle=f(side*PI/4),rim={x:p.x+f(cos(angle)*320),y:p.y+f(sin(angle)*320)};if(!terrain.valid(rim,.88)||Math.abs(terrain.height(rim)-ground)>120)clear=false;}
+   if(clear){centre=p;break;}
+  }
+  if(!centre)throw Error(`Could not place fauna pack ${group}.`);faunaCentres.push(centre);
+  const count=faunaR.integer(2,4),species=['Riftstalker','Prismback','Ashmaw','Duskmantis'][group%4],hp=[120,180,240,150][group%4];
+  for(let member=0;member<count;member++){const angle=f(f(f(member*2)*PI)/count),p={x:centre.x+f(cos(angle)*300),y:centre.y+f(sin(angle)*300)};points.push({kind:'Enemy',species,pack:4000+group,id:1200+group*4+member,x:p.x/100,y:p.y/100,z:terrain.height(p)/100+[.6536,.6888,.9,.6888][group%4],remaining:hp});}
+ }
  const {collision,...base}=asset;return {...base,points,villageRoute:{houses:routeHouses,keys:routeKeys},worldSeed:seed,worldGeneratorVersion:1,seedId:`HS1-${seed}`,mapMode:'initial-world',snapshot:`Initial world · HS1-${seed} · no saved progress`};
 }
