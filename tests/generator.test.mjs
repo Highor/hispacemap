@@ -152,3 +152,4 @@ console.log('All 517 original and added enemies match fresh native positions, sp
 
 for(const seed of ['HS1-42','HS1-123456789']){const m=generateWorld(seed,assets);assert.equal(m.points.filter(p=>['Cobaltite','Pyronite','Crythium'].includes(p.kind)).length,36);assert.equal(m.points.filter(p=>p.kind==='Rocket launch site').length,1);assert.equal(new Set(m.points.filter(p=>p.id>=2000&&p.id<3000&&p.pack>=6000&&p.species!=='Stinger').map(p=>p.species)).size,9);}
 console.log('World 3 rocket site, three advanced ores and mixed nine-species population verified.');
+const rocketNative=JSON.parse(readFileSync(new URL('./rocket-fauna-reference.json',import.meta.url))),rocketWeb=generateWorld('HS1-201026',assets);for(const p of rocketNative){const q=rocketWeb.points.find(q=>q.id===p.id&&q.pack>=6000);assert.ok(q&&Math.hypot(p.x-q.x,p.y-q.y)<.025,'World 3 enemy differs from native: '+p.id);}console.log('All 465 World 3 enemy positions match native within 2.5 cm.');
