@@ -12,7 +12,7 @@ button,input{font:inherit;color:inherit;background:#0d2635;border:1px solid #3c6
 <div class="spoiler-actions"><button type="button" id="spoiler-leave" autofocus>Go back</button><button type="button" id="spoiler-continue" class="spoiler-confirm">Use map generator</button></div></dialog>
 <script type="module" src="./spoiler-dialog.js?v=session-1"></script><div id="hispace-world-map">
  <header><a class="brand" href="./">HISPACE</a><span>SURVEY ATLAS</span></header><h1>World map</h1><p class="intro">Enter the world seed shown in your Save Game or Load Game slot.</p>
- <div class="hp-seed-controls"><label>World seed <input autocomplete="off" class="hp-seed-input" aria-label="World seed" placeholder="HS1-123456789" maxlength="14" spellcheck="false"></label><button type="button" class="btn hp-generate">Generate Map</button><div class="hp-seed-status text-small" role="status" aria-live="polite"></div></div>
+ <div class="hp-seed-controls"><label>World seed <input autocomplete="off" class="hp-seed-input" aria-label="World seed" placeholder="HS2-123456789" maxlength="14" spellcheck="false"></label><button type="button" class="btn hp-generate">Generate Map</button><div class="hp-seed-status text-small" role="status" aria-live="polite"></div></div>
  <div class="hp-legend" aria-label="Map legend"></div>
  <svg class="hp-map" role="img" aria-label="Hispace terrain, resources and recovery sites"></svg>
  <div class="hp-controls"><button type="button" class="btn hp-out" aria-label="Zoom out">−</button><button type="button" class="btn hp-in" aria-label="Zoom in">+</button><span class="text-small">Drag to pan · select a marker</span></div>
@@ -39,23 +39,24 @@ button,input{font:inherit;color:inherit;background:#0d2635;border:1px solid #3c6
 .hp-filter i{flex-shrink:0}
 </style>
  <script type="module">
- import {generateWorld} from "./generator.js?v=rocket-stage-1";
+ import {generateWorld} from "./generator.js?v=world-three-relief-2";
  (async()=>{
  const root=document.getElementById('hispace-world-map'), svg=root.querySelector('.hp-map'), ns='http://www.w3.org/2000/svg';
- const response=await fetch('./assets/world-hs1.json?v=world-three-1');if(!response.ok)throw Error('Terrain could not be loaded. Please reload the page.');
- const asset=await response.json();
- const requested=new URLSearchParams(location.search).get('seedid')||new URLSearchParams(location.search).get('seed')||'HS1-123456789';
- let initialError='';let data;try{data=generateWorld(requested,asset);}catch(error){initialError=error.message;data=generateWorld('HS1-123456789',asset);}
+ const responses=await Promise.all([1,2].map(v=>fetch(`./assets/world-hs${v}.json?v=relief-2`)));if(responses.some(r=>!r.ok))throw Error('Terrain could not be loaded. Please reload the page.');
+ const assets=await Promise.all(responses.map(r=>r.json()));
+ const assetFor=seed=>assets[String(seed).trim().toUpperCase().startsWith('HS2-')?1:0];
+ const requested=new URLSearchParams(location.search).get('seedid')||new URLSearchParams(location.search).get('seed')||'HS2-123456789';
+ let initialError='';let data;try{data=generateWorld(requested,assetFor(requested));}catch(error){initialError=error.message;data=generateWorld('HS2-123456789',assets[1]);}
  const input=root.querySelector('.hp-seed-input'), status=root.querySelector('.hp-seed-status'), generate=root.querySelector('.hp-generate');
  if(data.worldSeed)input.value=`HS${data.worldGeneratorVersion}-${data.worldSeed}`;
  status.textContent=initialError||data.snapshot;if(initialError)input.value=requested;
  const validMap=value=>value && Array.isArray(value.points) && value.points.length<100000 && value.points.every(p=>typeof p.kind==='string' && ['x','y','z','remaining'].every(k=>Number.isFinite(p[k]))) && Array.isArray(value.terrain) && value.terrain.length===6561 && value.terrain.every(Number.isFinite) && value.worldTwo && Array.isArray(value.worldTwo.terrain) && value.worldTwo.terrain.length===1517 && value.worldTwo.terrain.every(Number.isFinite);
  function displayMap(next){if(!validMap(next))throw new Error('Invalid map data.');data=next;selected=null;cx=4000;cy=0;half=6800;root.querySelector('.hp-detail').textContent=data.snapshot||'Imported map';status.textContent=data.snapshot||'Imported map';input.value=data.worldSeed?`HS${data.worldGeneratorVersion}-${data.worldSeed}`:'';draw();}
  generate.onclick=async()=>{
-  const seed=input.value.trim().toUpperCase(), match=/^HS1-([1-9][0-9]{0,9})$/.exec(seed);
-  if(!match || Number(match[1])>2147483647){status.textContent='Use HS1- followed by a number from 1 to 2147483647.';return;}
+  const seed=input.value.trim().toUpperCase(), match=/^HS[12]-([1-9][0-9]{0,9})$/.exec(seed);
+  if(!match || Number(match[1])>2147483647){status.textContent='Use HS1- or HS2- followed by a number from 1 to 2147483647.';return;}
   generate.disabled=true;status.textContent='Generating your world…';
-  try{await new Promise(requestAnimationFrame);displayMap(generateWorld(seed,asset));const url=new URL(location.href);url.search='';url.searchParams.set('seedid',seed);history.replaceState(null,'',url);}catch(error){status.textContent=error.message;}finally{generate.disabled=false;}
+  try{await new Promise(requestAnimationFrame);displayMap(generateWorld(seed,assetFor(seed)));const url=new URL(location.href);url.search='';url.searchParams.set('seedid',seed);history.replaceState(null,'',url);}catch(error){status.textContent=error.message;}finally{generate.disabled=false;}
  };
  input.addEventListener('keydown',event=>{if(event.key==='Enter')generate.click();});
  const names={'Base':'Main capsule','Player':'Starting position','Cache 1':'Solar cache','Cache 2':'Repair cache','Cache 3':'Power cache','Suit pod':'Spacesuit pod','Research':'Research capsule','Mining cache':'Mining cache','Future impact':'Future impact','Impact site':'Impact site','Tunnel 1':'Pass · west','Tunnel 2':'Pass · east','Enemy':'Enemy','Narrow pass':'Mountain pass','Danger sign':'DANGER sign','Skeleton':'Skeleton','Crash module':'Crashed module','Module chest':'Module chest','Module record':'Module record'};
@@ -130,4 +131,4 @@ button,input{font:inherit;color:inherit;background:#0d2635;border:1px solid #3c6
  svg.addEventListener('pointercancel',()=>{drag=null;});new ResizeObserver(draw).observe(root);draw();
  })().catch(error=>{document.querySelector('.hp-seed-status').textContent=error.message;});
  </script>
-</div><footer style="max-width:1396px;margin:0 auto">HS1 generator · Initial world layout. Saved progress is separate. Bookmark the URL to keep your seed.<br>HISPACE · Highor</footer></body></html>
+</div><footer style="max-width:1396px;margin:0 auto">HS1 / HS2 generators · Initial world layout. Saved progress is separate. Bookmark the URL to keep your seed.<br>HISPACE · Highor</footer></body></html>

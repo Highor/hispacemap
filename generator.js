@@ -3,7 +3,7 @@ const f=Math.fround, PI=f(Math.PI), TAU=f(2*PI);
 const sin=a=>f(Math.sin(a)), cos=a=>f(Math.cos(a));
 const polar=(a,r,ox=0)=>({x:f(ox+f(cos(a)*r)),y:f(sin(a)*r),z:0});
 const distance=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
-export function parseSeed(text){const m=/^HS1-([1-9][0-9]{0,9})$/.exec(String(text).trim().toUpperCase());if(!m||Number(m[1])>2147483647)throw Error('Enter an HS1 world seed, for example HS1-123456789.');return Number(m[1]);}
+export function parseSeed(text){const m=/^HS[12]-([1-9][0-9]{0,9})$/.exec(String(text).trim().toUpperCase());if(!m||Number(m[1])>2147483647)throw Error('Enter an HS1 or HS2 world seed, for example HS1-123456789.');return Number(m[1]);}
 export function subseed(seed,salt){let v=(seed^salt)>>>0;v=(v^(v>>>16))>>>0;v=Math.imul(v,0x7feb352d)>>>0;v=(v^(v>>>15))>>>0;v=Math.imul(v,0x846ca68b)>>>0;v=(v^(v>>>16))>>>0;return v%1000000+1;}
 export function towerMedkitOffsets(seed){
  const r=new RandomStream((subseed(seed,106)^0x5c17a3)|0),floors=[0,1,2,3,4,5,6,7,8],result=[];
@@ -34,6 +34,7 @@ export class Terrain{
  valid(p,slope){const h=this.hit(p);return h&&h.normal>=f(slope);}
 }
 export function generateWorld(seedText,asset){
+ const version=String(seedText).trim().toUpperCase().startsWith('HS2-')?2:1;
  const seed=parseSeed(seedText),terrain=new Terrain(asset.collision),random=salt=>new RandomStream(subseed(seed,salt));
  let r=random(101),a=f(r.range(0,TAU));const cache1=polar(a,9000);
  r=random(102);const cache2=polar(f(Math.atan2(cache1.y,cache1.x)+PI+r.range(f(-.55),f(.55))),11000);
@@ -192,5 +193,5 @@ export function generateWorld(seedText,asset){
  points.push({kind:'Rocket launch site',id:0,x:8000,y:0,z:terrain.height({x:800000,y:0})/100,remaining:1});
  const rocketR=random(3827),rocketCentres=[];
  for(let group=0;group<160;group++){let centre=null;for(let attempt=0;attempt<3000;attempt++){const p={x:f(rocketR.range(615000,985000)),y:f(rocketR.range(-185000,185000))},radius=Math.hypot(p.x-800000,p.y);if(radius>185000||radius<9000||(p.x<=622000&&Math.abs(p.y)<=14000)||rocketCentres.some(q=>distance(p,q)<8000)||!terrain.valid(p,.88))continue;centre=p;break;}if(!centre)continue;rocketCentres.push(centre);const count=rocketR.integer(2,4),type=group%10<5?5+group%5:group%10<9?1+group%4:0,names=['Stinger','Riftstalker','Prismback','Ashmaw','Duskmantis','Cinderclaw','Frostspine','Ironhide','Voidstrider','Embermaw'];for(let member=0;member<count;member++){const a=member*2*Math.PI/count,p={x:centre.x+Math.cos(a)*300,y:centre.y+Math.sin(a)*300};points.push({kind:type?'Enemy':'Flying enemy',species:names[type],pack:6000+group,id:2000+group*4+member,x:p.x/100,y:p.y/100,z:terrain.height(p)/100+.9,remaining:type>=5?180+(type-5)*40:[100,120,180,240,150][type]});}}
- const {collision,...base}=asset;return {...base,points,villageRoute:{houses:routeHouses,keys:routeKeys},worldSeed:seed,worldGeneratorVersion:1,seedId:`HS1-${seed}`,mapMode:'initial-world',snapshot:`Initial world · HS1-${seed} · no saved progress`};
+ const {collision,...base}=asset;return {...base,points,villageRoute:{houses:routeHouses,keys:routeKeys},worldSeed:seed,worldGeneratorVersion:version,seedId:`HS${version}-${seed}`,mapMode:'initial-world',snapshot:`Initial world · HS${version}-${seed} · no saved progress`};
 }

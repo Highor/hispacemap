@@ -4,7 +4,7 @@ import {generateWorld,parseSeed,RandomStream,Terrain} from '../generator.js';
 const assets=JSON.parse(readFileSync(new URL('../assets/world-hs1.json',import.meta.url)));
 const references=JSON.parse(readFileSync(new URL('./hs1-reference.json',import.meta.url)));
 const thirdWorldReferences=JSON.parse(readFileSync(new URL('./world-three-reference.json',import.meta.url)));
-for(const bad of ['','HS2-1','HS1-0','HS1--1','HS1-2147483648','HS1-1x'])assert.throws(()=>parseSeed(bad));
+for(const bad of ['','HS3-1','HS1-0','HS1--1','HS1-2147483648','HS1-1x'])assert.throws(()=>parseSeed(bad));
 assert.equal(parseSeed(' hs1-42 '),42);
 for(const ref of references){
  const map=generateWorld(ref.seed,assets);
@@ -153,3 +153,23 @@ console.log('All 517 original and added enemies match fresh native positions, sp
 for(const seed of ['HS1-42','HS1-123456789']){const m=generateWorld(seed,assets);assert.equal(m.points.filter(p=>['Cobaltite','Pyronite','Crythium'].includes(p.kind)).length,36);assert.equal(m.points.filter(p=>p.kind==='Rocket launch site').length,1);assert.equal(new Set(m.points.filter(p=>p.id>=2000&&p.id<3000&&p.pack>=6000&&p.species!=='Stinger').map(p=>p.species)).size,9);}
 console.log('World 3 rocket site, three advanced ores and mixed nine-species population verified.');
 const rocketNative=JSON.parse(readFileSync(new URL('./rocket-fauna-reference.json',import.meta.url))),rocketWeb=generateWorld('HS1-201026',assets);for(const p of rocketNative){const q=rocketWeb.points.find(q=>q.id===p.id&&q.pack>=6000);assert.ok(q&&Math.hypot(p.x-q.x,p.y-q.y)<.025,'World 3 enemy differs from native: '+p.id);}console.log('All 465 World 3 enemy positions match native within 2.5 cm.');
+
+const hs2=JSON.parse(readFileSync(new URL('../assets/world-hs2.json',import.meta.url)));
+assert.equal(parseSeed('HS2-42'),42);
+const oldTerrain=new Terrain(assets.collision),newTerrain=new Terrain(hs2.collision);
+assert.equal(newTerrain.height({x:800000,y:0}),oldTerrain.height({x:800000,y:0}));
+assert.equal(newTerrain.height({x:602000,y:0}),oldTerrain.height({x:602000,y:0}));
+assert.ok(newTerrain.height({x:710000,y:-60000})-oldTerrain.height({x:710000,y:-60000})>1000);
+for(const [x,y] of [[710000,-60000],[865000,-70000],[900000,60000],[740000,100000],[820000,90000],[700000,50000]]){
+ const top=newTerrain.height({x,y});assert.ok(newTerrain.hit({x,y}).normal>.999);
+ assert.ok(top-newTerrain.height({x:x-1300,y})>150,'Booster shelf rises over ordinary step height');
+}
+const second=generateWorld('HS2-201026',hs2);assert.equal(second.worldGeneratorVersion,2);assert.equal(second.seedId,'HS2-201026');
+assert.deepEqual(second.points.filter(p=>p.x<5780),generateWorld('HS1-201026',assets).points.filter(p=>p.x<5780));
+console.log('HS2 relief, protected sites, booster shelves and old-world stability passed');
+
+const hs2Native=JSON.parse(readFileSync(new URL('./hs2-fauna-reference.json',import.meta.url)));
+for(const p of hs2Native){const q=second.points.find(q=>q.id===p.id&&q.pack>=6000);assert.ok(q&&Math.hypot(p.x-q.x,p.y-q.y)<.025,'HS2 fauna differs from native '+p.id);}
+assert.equal(second.points.filter(q=>q.pack>=6000).length,hs2Native.length);
+assert.ok(second.snapshot.includes('HS2-201026'));
+console.log('HS2 native fauna matches all '+hs2Native.length+' enemies within 2.5 cm.');
