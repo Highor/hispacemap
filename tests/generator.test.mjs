@@ -8,7 +8,7 @@ for(const bad of ['','HS2-1','HS1-0','HS1--1','HS1-2147483648','HS1-1x'])assert.
 assert.equal(parseSeed(' hs1-42 '),42);
 for(const ref of references){
  const map=generateWorld(ref.seed,assets);
- assert.equal(map.points.length,ref.points.length+5+3456+64+96+192+59+map.points.filter(p=>p.kind==='Enemy'&&p.id>=800).length+map.points.filter(p=>p.kind==='Flying enemy').length+map.points.filter(p=>['Abandoned house','Cabin medkit'].includes(p.kind)).length,ref.seed+' doubled resource count');
+ assert.equal(map.points.length,ref.points.length+37+5+3456+64+96+192+59+map.points.filter(p=>p.kind==='Enemy'&&p.id>=800).length+map.points.filter(p=>p.kind==='Flying enemy').length+map.points.filter(p=>['Abandoned house','Cabin medkit'].includes(p.kind)).length,ref.seed+' doubled resource count');
  for(const [kind,id,oldX,y] of ref.points){
   // Opening the eastern ridge changes slope-based World 2 vegetation selection.
   if(kind==='Vitraleaf'&&id>=48)continue;
@@ -56,7 +56,7 @@ console.log('Abandoned houses and rare medkits match Unreal; 24 houses and two m
 const faunaReference=JSON.parse(readFileSync(new URL('./fauna-reference.json',import.meta.url)));
 const faunaMap=generateWorld(faunaReference.seed,assets);
 for(const ref of faunaReference.points){const p=faunaMap.points.find(p=>p.kind==='Enemy'&&p.id===ref.id);assert.ok(p&&Math.hypot(p.x-ref.x,p.y-ref.y)<.025&&p.species===ref.species&&p.pack===ref.pack&&p.remaining===ref.remaining,`Fauna ${ref.species} ${ref.id} differs from Unreal`);}
-for(const ref of references){const fauna=generateWorld(ref.seed,assets).points.filter(p=>p.id>=1200&&p.kind==='Enemy'),packs=new Map();for(const p of fauna){assert.ok(p.x>2000);packs.set(p.pack,(packs.get(p.pack)||0)+1);}assert.equal(packs.size,176);assert.ok([...packs.values()].every(n=>n>=2&&n<=4));for(const species of ['Riftstalker','Prismback','Ashmaw','Duskmantis'])assert.equal(new Set(fauna.filter(p=>p.species===species).map(p=>p.pack)).size,44);}
+for(const ref of references){const fauna=generateWorld(ref.seed,assets).points.filter(p=>p.id>=1200&&p.id<2000&&p.kind==='Enemy'),packs=new Map();for(const p of fauna){assert.ok(p.x>2000);packs.set(p.pack,(packs.get(p.pack)||0)+1);}assert.equal(packs.size,176);assert.ok([...packs.values()].every(n=>n>=2&&n<=4));for(const species of ['Riftstalker','Prismback','Ashmaw','Duskmantis'])assert.equal(new Set(fauna.filter(p=>p.species===species).map(p=>p.pack)).size,44);}
 console.log('Four new fauna species: native positions, HP, IDs and pack membership match; every fixture has 176 packs of two to four.');
 
 const additions=JSON.parse(readFileSync(new URL('./resource-additions-reference.json',import.meta.url)));
@@ -71,7 +71,7 @@ for(const seed of ['HS1-1','HS1-42','HS1-123456789']){
  assert.equal(p.filter(p=>p.kind==='Settlement capsule').length,4);
  assert.equal(p.filter(p=>p.kind==='Settlement chest').length,1);
  assert.equal(p.filter(p=>p.kind==='Medical regulator').length,1);
- const f=p.filter(p=>p.kind==='Flying enemy');assert.ok(f.length>=51&&f.length<=127);assert.ok(f.every(p=>p.x>2000&&p.x<4000&&p.remaining===100));
+ const f=p.filter(p=>p.kind==='Flying enemy'&&p.id<2000);assert.ok(f.length>=51&&f.length<=127);assert.ok(f.every(p=>p.x>2000&&p.x<4000&&p.remaining===100));
  assert.equal(f.filter(p=>Math.hypot(p.x-2350,p.y+180)<4).length,3);
 }
 console.log('Western settlement and seeded stinger checks passed.');
@@ -144,8 +144,11 @@ for(const seed of ['HS1-123456789','HS1-42','HS1-987654321']){const map=generate
 
 const northNative=JSON.parse(readFileSync(new URL('./north-relay-reference.json',import.meta.url)));const northWeb=generateWorld('HS1-201026',assets).points.find(p=>p.kind==='North relay');assert.ok(Math.hypot(northNative.x-northWeb.x,northNative.y-northWeb.y,northNative.z-northWeb.z)<.025,'Northern solar house matches Unreal');for(const ref of references){const map=generateWorld(ref.seed,assets),relay=map.points.filter(p=>p.kind==='North relay');assert.equal(relay.length,1);assert.ok(relay[0].x>2200&&relay[0].y< -500);}console.log('Northern solar service house matches Unreal and exists once on every fixture seed.');
 
-for(const ref of references){const m=generateWorld(ref.seed,assets),fauna=m.points.filter(p=>p.kind==='Enemy'&&p.id>=1200);assert.ok(fauna.every(p=>!(p.x>=5780&&Math.abs(p.y)<=140)));for(const test of [p=>p.x<4000,p=>p.x>=4000,p=>p.y<0,p=>p.y>=0])assert.ok(new Set(fauna.filter(test).map(p=>p.pack)).size>50);}
+for(const ref of references){const m=generateWorld(ref.seed,assets),fauna=m.points.filter(p=>p.kind==='Enemy'&&p.id>=1200&&p.id<2000);assert.ok(fauna.every(p=>!(p.x>=5780&&Math.abs(p.y)<=140)));for(const test of [p=>p.x<4000,p=>p.x>=4000,p=>p.y<0,p=>p.y>=0])assert.ok(new Set(fauna.filter(test).map(p=>p.pack)).size>50);}
 console.log('Dense fauna covers both axes and excludes the World 3 tunnel for every reference seed.');
 
 const denseNative=JSON.parse(readFileSync(new URL('./dense-fauna-reference.json',import.meta.url)));const denseWeb=generateWorld(denseNative.seed,assets);for(const p of denseNative.points){const q=denseWeb.points.find(q=>q.kind==='Enemy'&&q.id===p.id);assert.ok(q&&Math.hypot(q.x-p.x,q.y-p.y)<.025&&q.pack===p.pack&&q.species===p.species&&q.remaining===p.remaining,'Dense fauna differs from native '+p.id);}
 console.log('All 517 original and added enemies match fresh native positions, species, HP and pack IDs within 2.5cm.');
+
+for(const seed of ['HS1-42','HS1-123456789']){const m=generateWorld(seed,assets);assert.equal(m.points.filter(p=>['Cobaltite','Pyronite','Crythium'].includes(p.kind)).length,36);assert.equal(m.points.filter(p=>p.kind==='Rocket launch site').length,1);assert.equal(new Set(m.points.filter(p=>p.id>=2000&&p.id<3000&&p.pack>=6000&&p.species!=='Stinger').map(p=>p.species)).size,9);}
+console.log('World 3 rocket site, three advanced ores and mixed nine-species population verified.');
