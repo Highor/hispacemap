@@ -56,8 +56,8 @@ console.log('Abandoned houses and rare medkits match Unreal; 24 houses and two m
 const faunaReference=JSON.parse(readFileSync(new URL('./fauna-reference.json',import.meta.url)));
 const faunaMap=generateWorld(faunaReference.seed,assets);
 for(const ref of faunaReference.points){const p=faunaMap.points.find(p=>p.kind==='Enemy'&&p.id===ref.id);assert.ok(p&&Math.hypot(p.x-ref.x,p.y-ref.y)<.025&&p.species===ref.species&&p.pack===ref.pack&&p.remaining===ref.remaining,`Fauna ${ref.species} ${ref.id} differs from Unreal`);}
-for(const ref of references){const fauna=generateWorld(ref.seed,assets).points.filter(p=>p.id>=1200&&p.kind==='Enemy'),packs=new Map();for(const p of fauna){assert.ok(p.x>2000);packs.set(p.pack,(packs.get(p.pack)||0)+1);}assert.equal(packs.size,16);assert.ok([...packs.values()].every(n=>n>=2&&n<=4));for(const species of ['Riftstalker','Prismback','Ashmaw','Duskmantis'])assert.equal(new Set(fauna.filter(p=>p.species===species).map(p=>p.pack)).size,4);}
-console.log('Four new fauna species: native positions, HP, IDs and pack membership match; every fixture has sixteen packs of two to four.');
+for(const ref of references){const fauna=generateWorld(ref.seed,assets).points.filter(p=>p.id>=1200&&p.kind==='Enemy'),packs=new Map();for(const p of fauna){assert.ok(p.x>2000);packs.set(p.pack,(packs.get(p.pack)||0)+1);}assert.equal(packs.size,176);assert.ok([...packs.values()].every(n=>n>=2&&n<=4));for(const species of ['Riftstalker','Prismback','Ashmaw','Duskmantis'])assert.equal(new Set(fauna.filter(p=>p.species===species).map(p=>p.pack)).size,44);}
+console.log('Four new fauna species: native positions, HP, IDs and pack membership match; every fixture has 176 packs of two to four.');
 
 const additions=JSON.parse(readFileSync(new URL('./resource-additions-reference.json',import.meta.url)));
 const expanded=generateWorld('HS1-123456789',assets);
@@ -143,3 +143,9 @@ for(const seed of ['HS1-123456789','HS1-42','HS1-987654321']){const map=generate
 {const map=generateWorld('HS1-123456789',assets);for(const native of assets.points.filter(p=>p.kind==='Tower medkit')){const web=map.points.find(p=>p.kind===native.kind&&p.id===native.id);assert.ok(Math.hypot(native.x-web.x,native.y-web.y,native.z-web.z)<.025,'Native medkit coordinate mismatch');}}
 
 const northNative=JSON.parse(readFileSync(new URL('./north-relay-reference.json',import.meta.url)));const northWeb=generateWorld('HS1-201026',assets).points.find(p=>p.kind==='North relay');assert.ok(Math.hypot(northNative.x-northWeb.x,northNative.y-northWeb.y,northNative.z-northWeb.z)<.025,'Northern solar house matches Unreal');for(const ref of references){const map=generateWorld(ref.seed,assets),relay=map.points.filter(p=>p.kind==='North relay');assert.equal(relay.length,1);assert.ok(relay[0].x>2200&&relay[0].y< -500);}console.log('Northern solar service house matches Unreal and exists once on every fixture seed.');
+
+for(const ref of references){const m=generateWorld(ref.seed,assets),fauna=m.points.filter(p=>p.kind==='Enemy'&&p.id>=1200);assert.ok(fauna.every(p=>!(p.x>=5780&&Math.abs(p.y)<=140)));for(const test of [p=>p.x<4000,p=>p.x>=4000,p=>p.y<0,p=>p.y>=0])assert.ok(new Set(fauna.filter(test).map(p=>p.pack)).size>50);}
+console.log('Dense fauna covers both axes and excludes the World 3 tunnel for every reference seed.');
+
+const denseNative=JSON.parse(readFileSync(new URL('./dense-fauna-reference.json',import.meta.url)));const denseWeb=generateWorld(denseNative.seed,assets);for(const p of denseNative.points){const q=denseWeb.points.find(q=>q.kind==='Enemy'&&q.id===p.id);assert.ok(q&&Math.hypot(q.x-p.x,q.y-p.y)<.025&&q.pack===p.pack&&q.species===p.species&&q.remaining===p.remaining,'Dense fauna differs from native '+p.id);}
+console.log('All 517 original and added enemies match fresh native positions, species, HP and pack IDs within 2.5cm.');

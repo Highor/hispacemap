@@ -173,5 +173,19 @@ export function generateWorld(seedText,asset){
  if(!relay)throw Error('Could not place northern service house.');
  let floor=terrain.height(relay);for(const x of [-150,150])for(const y of [-140,140])floor=Math.max(floor,terrain.height({x:relay.x+x,y:relay.y+y}));
  points.push({kind:'North relay',id:0,x:relay.x/100,y:relay.y/100,z:(floor+5)/100,remaining:1});
+ const denseR=random(1827);
+ for(let group=16;group<176;group++){
+  let centre=null;
+  for(let attempt=0;attempt<5000;attempt++){
+   const p={x:f(denseR.range(217000,583000)),y:f(denseR.range(-183000,183000))};
+   if(Math.hypot(p.x-400000,p.y)>185000||(p.x>=578000&&Math.abs(p.y)<=14000)||faunaMissions.some(q=>distance(p,q)<18000)||settlement.some(q=>distance(p,q)<12000)||cabins.some(q=>distance(p,q)<4000)||oldFoes.some(q=>Math.hypot(p.x-q.x*100,p.y-q.y*100)<4500)||faunaCentres.some(q=>distance(p,q)<11000)||!terrain.valid(p,.9))continue;
+   let clear=true;const ground=terrain.height(p);
+   for(let side=0;side<8;side++){const angle=f(side*PI/4),rim={x:p.x+f(cos(angle)*320),y:p.y+f(sin(angle)*320)};if(!terrain.valid(rim,.88)||Math.abs(terrain.height(rim)-ground)>120)clear=false;}
+   if(clear){centre=p;break;}
+  }
+  if(!centre)throw Error(`Could not place fauna pack ${group}.`);faunaCentres.push(centre);
+  const count=denseR.integer(2,4),species=['Riftstalker','Prismback','Ashmaw','Duskmantis'][group%4],hp=[120,180,240,150][group%4];
+  for(let member=0;member<count;member++){const angle=f(f(f(member*2)*PI)/count),p={x:centre.x+f(cos(angle)*300),y:centre.y+f(sin(angle)*300)};points.push({kind:'Enemy',species,pack:4000+group,id:1200+group*4+member,x:p.x/100,y:p.y/100,z:terrain.height(p)/100+[.6536,.6888,.9,.6888][group%4],remaining:hp});}
+ }
  const {collision,...base}=asset;return {...base,points,villageRoute:{houses:routeHouses,keys:routeKeys},worldSeed:seed,worldGeneratorVersion:1,seedId:`HS1-${seed}`,mapMode:'initial-world',snapshot:`Initial world · HS1-${seed} · no saved progress`};
 }
