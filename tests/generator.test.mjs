@@ -8,7 +8,7 @@ for(const bad of ['','HS3-1','HS1-0','HS1--1','HS1-2147483648','HS1-1x'])assert.
 assert.equal(parseSeed(' hs1-42 '),42);
 for(const ref of references){
  const map=generateWorld(ref.seed,assets);
- assert.equal(map.points.length,ref.points.length+38+5+3456+64+96+192+60+map.points.filter(p=>p.kind==='Enemy'&&p.id>=800).length+map.points.filter(p=>p.kind==='Flying enemy').length+map.points.filter(p=>['Abandoned house','Cabin medkit','Frontier ruin','Frontier medkit','Frontier ammo'].includes(p.kind)).length,ref.seed+' doubled resource count');
+ assert.equal(map.points.length,ref.points.length+39+5+3456+64+96+192+60+map.points.filter(p=>p.kind==='Enemy'&&p.id>=800).length+map.points.filter(p=>p.kind==='Flying enemy').length+map.points.filter(p=>['Abandoned house','Cabin medkit','Frontier ruin','Frontier medkit','Frontier ammo'].includes(p.kind)).length,ref.seed+' doubled resource count');
  for(const [kind,id,oldX,y] of ref.points){
   // Opening the eastern ridge changes slope-based World 2 vegetation selection.
   if(kind==='Vitraleaf'&&id>=48)continue;
@@ -183,3 +183,6 @@ for(const p of frontierReference.points){const q=frontierMap.find(q=>q.kind===p.
 console.log('All 24 World 3 ruins and 18 supplies match the native runtime within 2.5 cm.');
 
 const crucible=generateWorld("HS2-201026",hs2).points.filter(p=>p.kind==="The Sable Crucible");assert.equal(crucible.length,1);assert.equal(crucible[0].x,3900);assert.equal(crucible[0].y,1450);assert.equal(crucible[0].remaining,36);
+
+for(const [seed,assetsForVersion] of [["HS1-201026",assets],["HS2-201026",hs2]]){const vault=generateWorld(seed,assetsForVersion).points.filter(p=>p.kind==="The Obsidian Vault");assert.equal(vault.length,1);assert.equal(vault[0].x,9700);assert.equal(vault[0].y,450);assert.equal(vault[0].remaining,1);assert.ok(Number.isFinite(vault[0].z));}
+console.log("Obsidian Vault marker is synchronized for both supported world generators.");

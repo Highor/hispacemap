@@ -190,6 +190,7 @@ export function generateWorld(seedText,asset){
  }
 
  for(let i=0;i<36;i++){const a=i*2.399963229728653,radius=35000+(i%6)*25000,p={x:800000+Math.cos(a)*radius,y:Math.sin(a)*radius};points.push({kind:['Cobaltite','Pyronite','Crythium'][i%3],id:132+i,x:p.x/100,y:p.y/100,z:terrain.height(p)/100,remaining:40,advancedMinerOnly:true,toxic:i%3!==0});}
+ points.push({kind:'The Obsidian Vault',id:0,x:9700,y:450,z:terrain.height({x:970000,y:45000})/100,remaining:1});
  points.push({kind:'The Sable Crucible',id:0,x:3900,y:1450,z:terrain.height({x:390000,y:145000})/100,remaining:36});
  points.push({kind:'The Hollow Foundry',id:0,x:6280,y:-100,z:terrain.height({x:628000,y:-10000})/100,remaining:30});
  points.push({kind:'Rocket launch site',id:0,x:8000,y:0,z:terrain.height({x:800000,y:0})/100,remaining:1});
