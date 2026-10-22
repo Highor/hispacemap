@@ -194,5 +194,14 @@ export function generateWorld(seedText,asset){
  points.push({kind:'Rocket launch site',id:0,x:8000,y:0,z:terrain.height({x:800000,y:0})/100,remaining:1});
  const rocketR=random(3827),rocketCentres=[];
  for(let group=0;group<160;group++){let centre=null;for(let attempt=0;attempt<3000;attempt++){const p={x:f(rocketR.range(615000,985000)),y:f(rocketR.range(-185000,185000))},radius=Math.hypot(p.x-800000,p.y);if(radius>185000||radius<9000||(p.x<=622000&&Math.abs(p.y)<=14000)||rocketCentres.some(q=>distance(p,q)<8000)||!terrain.valid(p,.88))continue;centre=p;break;}if(!centre)continue;rocketCentres.push(centre);const count=rocketR.integer(2,4),type=group%10<5?5+group%5:group%10<9?1+group%4:0,names=['Stinger','Riftstalker','Prismback','Ashmaw','Duskmantis','Cinderclaw','Frostspine','Ironhide','Voidstrider','Embermaw'];for(let member=0;member<count;member++){const a=member*2*Math.PI/count,p={x:centre.x+Math.cos(a)*300,y:centre.y+Math.sin(a)*300};points.push({kind:type?'Enemy':'Flying enemy',species:names[type],pack:6000+group,id:2000+group*4+member,x:p.x/100,y:p.y/100,z:terrain.height(p)/100+.9,remaining:type>=5?180+(type-5)*40:[100,120,180,240,150][type]});}}
+ const frontierBlockers=points.filter(p=>['Cobaltite','Pyronite','Crythium','Glass','Hydrite','Verdite','Vitraleaf'].includes(p.kind));
+ const frontierFoes=points.filter(p=>p.pack>=6000),frontierHomes=[];let frontierLoot=0;
+ for(const p of asset.frontierCandidates||[]){
+  if(frontierHomes.length>=24)break;
+  if(frontierBlockers.some(q=>Math.hypot(p.x-q.x,p.y-q.y)<22)||frontierFoes.some(q=>Math.hypot(p.x-q.x,p.y-q.y)<18)||frontierHomes.some(q=>Math.hypot(p.x-q.x,p.y-q.y)<70))continue;
+  const index=frontierHomes.length;frontierHomes.push(p);points.push({kind:'Frontier ruin',id:index,x:p.x,y:p.y,z:p.z,remaining:1});
+  if(index%4===3)continue;const a=p.yaw*Math.PI/180;
+  points.push({kind:index%4===0?'Frontier medkit':'Frontier ammo',id:frontierLoot++,x:p.x-2.72*Math.cos(a)-1.6*Math.sin(a),y:p.y-2.72*Math.sin(a)+1.6*Math.cos(a),z:p.z+.288,remaining:1});
+ }
  const {collision,...base}=asset;return {...base,points,villageRoute:{houses:routeHouses,keys:routeKeys},worldSeed:seed,worldGeneratorVersion:version,seedId:`HS${version}-${seed}`,mapMode:'initial-world',snapshot:`Initial world · HS${version}-${seed} · no saved progress`};
 }
