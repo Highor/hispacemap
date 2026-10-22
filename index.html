@@ -60,9 +60,10 @@ button,input{font:inherit;color:inherit;background:#0d2635;border:1px solid #3c6
  };
  input.addEventListener('keydown',event=>{if(event.key==='Enter')generate.click();});
  const names={'Base':'Main capsule','Player':'Starting position','Cache 1':'Solar cache','Cache 2':'Repair cache','Cache 3':'Power cache','Suit pod':'Spacesuit pod','Research':'Research capsule','Mining cache':'Mining cache','Future impact':'Future impact','Impact site':'Impact site','Tunnel 1':'Pass · west','Tunnel 2':'Pass · east','Enemy':'Enemy','Narrow pass':'Mountain pass','Danger sign':'DANGER sign','Skeleton':'Skeleton','Crash module':'Crashed module','Module chest':'Module chest','Module record':'Module record'};
- const groups=[[`Enemies · ${data.points.filter(p=>p.kind==='Enemy').length} walkers + stingers`,'var(--red)','Enemy'],['Locations','var(--foreground)',null],['Iron · 32 fields','var(--viz-series-1)','Iron'],['Bronze · 32 fields','var(--viz-series-2)','Bronze'],['Glass · 192 pieces','var(--viz-series-3)','Glass'],['Hydrite · 2304','var(--viz-series-4)','Hydrite'],['Verdite · 2304','var(--viz-series-5)','Verdite'],['Vitraleaf · 96 + 288 plants','var(--green)','Vitraleaf'],['Asterium · 32 fields','var(--purple)','Asterium'],['Vesperite · 32 fields','var(--yellow)','Vesperite'],['Sulphrite · 4 toxic fields','#e7e63b','Sulphrite'],['Cobaltite / 12 advanced fields','#3889ff','Cobaltite'],['Pyronite / 12 toxic fields','#ee762e','Pyronite'],['Crythium / 12 toxic fields','#62e6bb','Crythium']];
+ const groups=[[`Enemies · ${data.points.filter(p=>p.kind==='Enemy').length} walkers + stingers`,'var(--red)','Enemy'],['Locations','var(--foreground)',null],['Dungeons','var(--purple)','Dungeons'],['Iron · 32 fields','var(--viz-series-1)','Iron'],['Bronze · 32 fields','var(--viz-series-2)','Bronze'],['Glass · 192 pieces','var(--viz-series-3)','Glass'],['Hydrite · 2304','var(--viz-series-4)','Hydrite'],['Verdite · 2304','var(--viz-series-5)','Verdite'],['Vitraleaf · 96 + 288 plants','var(--green)','Vitraleaf'],['Asterium · 32 fields','var(--purple)','Asterium'],['Vesperite · 32 fields','var(--yellow)','Vesperite'],['Sulphrite · 4 toxic fields','#e7e63b','Sulphrite'],['Cobaltite / 12 advanced fields','#3889ff','Cobaltite'],['Pyronite / 12 toxic fields','#ee762e','Pyronite'],['Crythium / 12 toxic fields','#62e6bb','Crythium']];
  const enabledKinds=new Set();
- const groupFor=p=>p.kind==='Flying enemy'?'Enemy':groups.find(g=>g[2]===p.kind)?.[2]||'Locations';
+ const dungeonKinds=new Set(['The Hollow Foundry','The Sable Crucible','The Obsidian Vault','The Final Bastion / Launch Control']);
+ const groupFor=p=>dungeonKinds.has(p.kind)?'Dungeons':p.kind==='Flying enemy'?'Enemy':groups.find(g=>g[2]===p.kind)?.[2]||'Locations';
  const isVisible=p=>!['Skeleton','Danger sign'].includes(p.kind)&&(p.kind==='Base'||enabledKinds.has(groupFor(p)));
  for(const [label,color,kind] of groups){
   const e=document.createElement('label');e.className='hp-filter text-small';
@@ -72,13 +73,13 @@ button,input{font:inherit;color:inherit;background:#0d2635;border:1px solid #3c6
   const dot=document.createElement('i');dot.style.setProperty('--mark',color);
   if(['Iron','Bronze','Asterium','Vesperite','Sulphrite','Cobaltite','Pyronite','Crythium'].includes(kind))dot.style.borderRadius='0';
   if(kind==='Glass'){dot.style.borderRadius='0';dot.style.transform='rotate(45deg)';}
-  if(key==='Locations')dot.style.clipPath='polygon(50% 0,100% 100%,0 100%)';
+  if(key==='Locations'||key==='Dungeons')dot.style.clipPath='polygon(50% 0,100% 100%,0 100%)';
   e.append(checkbox,dot,document.createTextNode(label));root.querySelector('.hp-legend').append(e);
  }
  let cx=4000,cy=0,half=6800,w=700,h=590,selected=null,drag=null,moved=false;
  const make=(tag,attrs,parent=svg)=>{const n=document.createElementNS(ns,tag);for(const k in attrs)n.setAttribute(k,attrs[k]);parent.append(n);return n};
  const mx=x=>x;
- const color=p=>p.kind==='Flying enemy'?'var(--red)':groups.find(g=>g[2]===p.kind)?.[1]||'var(--foreground)';
+ const color=p=>groups.find(g=>g[2]===groupFor(p))?.[1]||'var(--foreground)';
  let sx,sy,scale,L=46,T=16,R,B;
 
  function draw(){w=root.clientWidth;h=Math.max(380,Math.min(800,w*.7+30));svg.setAttribute('viewBox',`0 0 ${w} ${h}`);svg.setAttribute('height',h);svg.replaceChildren();R=w-14;B=h-40;const side=R-L;scale=side/(2*half);sx=x=>L+(x-cx+half)*scale;sy=y=>(T+B)/2+(y-cy)*scale;
