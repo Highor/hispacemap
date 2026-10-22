@@ -8,7 +8,7 @@ for(const bad of ['','HS3-1','HS1-0','HS1--1','HS1-2147483648','HS1-1x'])assert.
 assert.equal(parseSeed(' hs1-42 '),42);
 for(const ref of references){
  const map=generateWorld(ref.seed,assets);
- assert.equal(map.points.length,ref.points.length+37+5+3456+64+96+192+59+map.points.filter(p=>p.kind==='Enemy'&&p.id>=800).length+map.points.filter(p=>p.kind==='Flying enemy').length+map.points.filter(p=>['Abandoned house','Cabin medkit'].includes(p.kind)).length,ref.seed+' doubled resource count');
+ assert.equal(map.points.length,ref.points.length+38+5+3456+64+96+192+59+map.points.filter(p=>p.kind==='Enemy'&&p.id>=800).length+map.points.filter(p=>p.kind==='Flying enemy').length+map.points.filter(p=>['Abandoned house','Cabin medkit'].includes(p.kind)).length,ref.seed+' doubled resource count');
  for(const [kind,id,oldX,y] of ref.points){
   // Opening the eastern ridge changes slope-based World 2 vegetation selection.
   if(kind==='Vitraleaf'&&id>=48)continue;
@@ -173,3 +173,5 @@ for(const p of hs2Native){const q=second.points.find(q=>q.id===p.id&&q.pack>=600
 assert.equal(second.points.filter(q=>q.pack>=6000).length,hs2Native.length);
 assert.ok(second.snapshot.includes('HS2-201026'));
 console.log('HS2 native fauna matches all '+hs2Native.length+' enemies within 2.5 cm.');
+
+const foundry=generateWorld("HS1-201026",assets).points.filter(p=>p.kind==='The Hollow Foundry');assert.equal(foundry.length,1);assert.equal(foundry[0].x,6280);assert.equal(foundry[0].y,-100);assert.equal(foundry[0].remaining,30);
