@@ -39,7 +39,7 @@ button,input{font:inherit;color:inherit;background:#0d2635;border:1px solid #3c6
 .hp-filter i{flex-shrink:0}
 </style>
  <script type="module">
- import {generateWorld} from "./generator.js?v=bastion-1";
+ import {generateWorld} from "./generator.js?v=frontier-population-2";
  (async()=>{
  const root=document.getElementById('hispace-world-map'), svg=root.querySelector('.hp-map'), ns='http://www.w3.org/2000/svg';
  const responses=await Promise.all([1,2].map(v=>fetch(`./assets/world-hs${v}.json?v=frontier-1`)));if(responses.some(r=>!r.ok))throw Error('Terrain could not be loaded. Please reload the page.');
@@ -60,7 +60,7 @@ button,input{font:inherit;color:inherit;background:#0d2635;border:1px solid #3c6
  };
  input.addEventListener('keydown',event=>{if(event.key==='Enter')generate.click();});
  const names={'Base':'Main capsule','Player':'Starting position','Cache 1':'Solar cache','Cache 2':'Repair cache','Cache 3':'Power cache','Suit pod':'Spacesuit pod','Research':'Research capsule','Mining cache':'Mining cache','Future impact':'Future impact','Impact site':'Impact site','Tunnel 1':'Pass · west','Tunnel 2':'Pass · east','Enemy':'Enemy','Narrow pass':'Mountain pass','Danger sign':'DANGER sign','Skeleton':'Skeleton','Crash module':'Crashed module','Module chest':'Module chest','Module record':'Module record'};
- const groups=[['Enemies','var(--red)','Enemy'],['Locations','var(--foreground)',null],['Dungeons','var(--purple)','Dungeons'],['Iron · 32 fields','var(--viz-series-1)','Iron'],['Bronze · 32 fields','var(--viz-series-2)','Bronze'],['Glass · 192 pieces','var(--viz-series-3)','Glass'],['Hydrite · 2304','var(--viz-series-4)','Hydrite'],['Verdite · 2304','var(--viz-series-5)','Verdite'],['Vitraleaf · 96 + 288 plants','var(--green)','Vitraleaf'],['Asterium · 32 fields','var(--purple)','Asterium'],['Vesperite · 32 fields','var(--yellow)','Vesperite'],['Sulphrite · 4 toxic fields','#e7e63b','Sulphrite'],['Cobaltite / 12 advanced fields','#3889ff','Cobaltite'],['Pyronite / 12 toxic fields','#ee762e','Pyronite'],['Crythium / 12 toxic fields','#62e6bb','Crythium']];
+ const groups=[['Enemies','var(--red)','Enemy'],['Locations','var(--foreground)',null],['Dungeons','var(--purple)','Dungeons'],['Iron','var(--viz-series-1)','Iron'],['Bronze','var(--viz-series-2)','Bronze'],['Glass','var(--viz-series-3)','Glass'],['Hydrite','var(--viz-series-4)','Hydrite'],['Verdite','var(--viz-series-5)','Verdite'],['Vitraleaf','var(--green)','Vitraleaf'],['Asterium','var(--purple)','Asterium'],['Vesperite','var(--yellow)','Vesperite'],['Sulphrite','#e7e63b','Sulphrite'],['Cobaltite','#3889ff','Cobaltite'],['Pyronite','#ee762e','Pyronite'],['Crythium','#62e6bb','Crythium']];
  const enabledKinds=new Set();
  const dungeonKinds=new Set(['The Hollow Foundry','The Sable Crucible','The Obsidian Vault','The Final Bastion / Launch Control']);
  const groupFor=p=>dungeonKinds.has(p.kind)?'Dungeons':p.kind==='Flying enemy'?'Enemy':groups.find(g=>g[2]===p.kind)?.[2]||'Locations';

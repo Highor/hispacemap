@@ -100,6 +100,12 @@ export function generateWorld(seedText,asset){
   begin=end;
  }
  for(let i=0;i<192;i++)plants.push(extra(plants[i],12000,190000));
+ const frontierPlants=new RandomStream(researchSeed^0x3c829);
+ for(let t=0;t<80000&&plants.length<672;t++){
+  const aa=f(frontierPlants.range(0,TAU)),radius=f(Math.sqrt(frontierPlants.range(f(12000*12000),f(185000*185000)))),p=polar(aa,radius,800000);
+  if((p.x<=622000&&Math.abs(p.y)<=14000)||distance(p,{x:628000,y:-10000})<2500||distance(p,{x:970000,y:45000})<2500||!terrain.valid(p,.9))continue;
+  if(plants.slice(384).every(o=>distance(p,o)>=7000)){p.z=terrain.hit(p).z;plants.push(p);}
+ }
  const routeHouses=[0,1,2],routeKeys=[0,1,2,3,4],routeRandom=random(391);
  for(let i=2;i>0;i--){const j=routeRandom.integer(0,i);[routeHouses[i],routeHouses[j]]=[routeHouses[j],routeHouses[i]];}if(routeHouses.join()==='0,1,2')[routeHouses[0],routeHouses[2]]=[routeHouses[2],routeHouses[0]];
  routeHouses.unshift(5);routeHouses.push(3,4);
@@ -195,8 +201,8 @@ export function generateWorld(seedText,asset){
  points.push({kind:'The Sable Crucible',id:0,x:3900,y:1450,z:terrain.height({x:390000,y:145000})/100,remaining:36});
  points.push({kind:'The Hollow Foundry',id:0,x:6280,y:-100,z:terrain.height({x:628000,y:-10000})/100,remaining:30});
  points.push({kind:'Rocket launch site',id:0,x:8000,y:0,z:terrain.height({x:800000,y:0})/100,remaining:1});
- const rocketR=random(3827),rocketCentres=[];
- for(let group=0;group<160;group++){let centre=null;for(let attempt=0;attempt<3000;attempt++){const p={x:f(rocketR.range(615000,985000)),y:f(rocketR.range(-185000,185000))},radius=Math.hypot(p.x-800000,p.y);if(radius>185000||radius<9000||(p.x<=622000&&Math.abs(p.y)<=14000)||rocketCentres.some(q=>distance(p,q)<8000)||!terrain.valid(p,.88))continue;centre=p;break;}if(!centre)continue;rocketCentres.push(centre);const count=rocketR.integer(2,4),type=group%10<5?5+group%5:group%10<9?1+group%4:0,names=['Stinger','Riftstalker','Prismback','Ashmaw','Duskmantis','Cinderclaw','Frostspine','Ironhide','Voidstrider','Embermaw'];for(let member=0;member<count;member++){const a=member*2*Math.PI/count,p={x:centre.x+Math.cos(a)*300,y:centre.y+Math.sin(a)*300};points.push({kind:type?'Enemy':'Flying enemy',species:names[type],pack:6000+group,id:2000+group*4+member,x:p.x/100,y:p.y/100,z:terrain.height(p)/100+.9,remaining:type>=5?180+(type-5)*40:[100,120,180,240,150][type]});}}
+ const rocketR=random(3827),rocketCentres=[],originalCounts=Array(160).fill(0);
+ for(let group=0;group<320;group++){if(group>=160&&!originalCounts[group-160])continue;let centre=null;for(let attempt=0;attempt<3000;attempt++){const p={x:f(rocketR.range(615000,985000)),y:f(rocketR.range(-185000,185000))},radius=Math.hypot(p.x-800000,p.y);if(radius>185000||radius<9000||(p.x<=622000&&Math.abs(p.y)<=14000)||rocketCentres.some(q=>distance(p,q)<8000)||!terrain.valid(p,.88))continue;centre=p;break;}if(!centre)continue;rocketCentres.push(centre);const count=group<160?rocketR.integer(2,4):originalCounts[group-160];if(group<160)originalCounts[group]=count;const type=group%10<5?5+group%5:group%10<9?1+group%4:0,names=['Stinger','Riftstalker','Prismback','Ashmaw','Duskmantis','Cinderclaw','Frostspine','Ironhide','Voidstrider','Embermaw'];for(let member=0;member<count;member++){const a=member*2*Math.PI/count,p={x:centre.x+Math.cos(a)*300,y:centre.y+Math.sin(a)*300};points.push({kind:type?'Enemy':'Flying enemy',species:names[type],pack:6000+group,id:group<160?2000+group*4+member:10000+(group-160)*4+member,x:p.x/100,y:p.y/100,z:terrain.height(p)/100+.9,remaining:type>=5?180+(type-5)*40:[100,120,180,240,150][type]});}}
  const frontierBlockers=points.filter(p=>['Cobaltite','Pyronite','Crythium','Glass','Hydrite','Verdite','Vitraleaf'].includes(p.kind));
  const frontierFoes=points.filter(p=>p.pack>=6000),frontierHomes=[];let frontierLoot=0;
  for(const p of asset.frontierCandidates||[]){
