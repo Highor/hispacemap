@@ -8,7 +8,7 @@ for(const bad of ['','HS3-1','HS1-0','HS1--1','HS1-2147483648','HS1-1x'])assert.
 assert.equal(parseSeed(' hs1-42 '),42);
 for(const ref of references){
  const map=generateWorld(ref.seed,assets);
- assert.equal(map.points.length,ref.points.length+38+5+3456+64+96+192+59+map.points.filter(p=>p.kind==='Enemy'&&p.id>=800).length+map.points.filter(p=>p.kind==='Flying enemy').length+map.points.filter(p=>['Abandoned house','Cabin medkit','Frontier ruin','Frontier medkit','Frontier ammo'].includes(p.kind)).length,ref.seed+' doubled resource count');
+ assert.equal(map.points.length,ref.points.length+38+5+3456+64+96+192+60+map.points.filter(p=>p.kind==='Enemy'&&p.id>=800).length+map.points.filter(p=>p.kind==='Flying enemy').length+map.points.filter(p=>['Abandoned house','Cabin medkit','Frontier ruin','Frontier medkit','Frontier ammo'].includes(p.kind)).length,ref.seed+' doubled resource count');
  for(const [kind,id,oldX,y] of ref.points){
   // Opening the eastern ridge changes slope-based World 2 vegetation selection.
   if(kind==='Vitraleaf'&&id>=48)continue;
@@ -181,3 +181,5 @@ const frontierMap=generateWorld(frontierReference.seed,hs2).points.filter(p=>p.k
 assert.equal(frontierMap.length,42);
 for(const p of frontierReference.points){const q=frontierMap.find(q=>q.kind===p.kind&&q.id===p.id);assert.ok(q&&Math.hypot(q.x-p.x,q.y-p.y)<.025&&Math.abs(q.z-p.z)<.025&&q.remaining===p.remaining,'Frontier marker differs from native '+p.kind+' '+p.id);}
 console.log('All 24 World 3 ruins and 18 supplies match the native runtime within 2.5 cm.');
+
+const crucible=generateWorld("HS2-201026",hs2).points.filter(p=>p.kind==="The Sable Crucible");assert.equal(crucible.length,1);assert.equal(crucible[0].x,3900);assert.equal(crucible[0].y,1450);assert.equal(crucible[0].remaining,36);
