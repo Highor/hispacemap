@@ -252,5 +252,23 @@ export function generateWorld(seedText,asset){
    if(!centre)throw Error('Could not place toxic pool '+world+':'+i);toxicPools.push(centre);points.push({kind:'Toxic pool',id:toxicPools.length-1,x:centre.x/100,y:centre.y/100,z:centre.z/100,radius:radius/100,yaw:centre.yaw,deep:centre.deep,yellow:centre.yellow,remaining:1});
   }
  }
+ // Spatial buckets keep the denser placement search responsive without changing rejection rules.
+ const poolGrid=list=>{const cells=new Map();for(const q of list){const key=Math.floor(q.x/10000)+','+Math.floor(q.y/10000);if(!cells.has(key))cells.set(key,[]);cells.get(key).push(q);}return (p,r)=>{for(let x=Math.floor((p.x-r)/10000);x<=Math.floor((p.x+r)/10000);x++)for(let y=Math.floor((p.y-r)/10000);y<=Math.floor((p.y+r)/10000);y++)for(const q of cells.get(x+','+y)||[])if(distance(p,q)<r)return true;return false;};};
+ const poolSiteNear=poolGrid(poolSites),poolFoeNear=poolGrid(poolFoes),poolOreNear=poolGrid(poolOres),poolResourceNear=poolGrid(poolResources);
+ // Additional density uses its own stream, preserving the original six basins per world.
+ for(let world=1;world<=3;world++){const r=random(16900+world),origin=(world-1)*400000;
+  for(let i=0;i<24;i++){const desired=[3200,2600,2200,1800,1400,1000][i%6];let centre=null;
+   for(let attempt=0;attempt<60000;attempt++){
+    const radius=Math.max(700,Math.round((attempt<20000?desired:attempt<40000?desired*.7:700)/100)*100),extent=f(radius*f(2.3));
+    const p={x:origin+r.integer(-1830,1830)*100,y:r.integer(-1830,1830)*100};
+    if(Math.hypot(p.x-origin,p.y)>183000||Math.abs(p.y)<12000||(world===1&&p.x>180000)||(p.x>=578000&&p.x<=622000&&Math.abs(p.y)<=14000))continue;
+    if(poolSiteNear(p,extent+6000)||poolFoeNear(p,extent+1500)||poolOreNear(p,extent+1200)||poolResourceNear(p,extent+350)||toxicPools.some(q=>distance(p,q)<extent+q.radius*2.3+2000))continue;
+    const hit=terrain.hit(p);if(!hit||hit.normal<f(.94))continue;let low=hit.z,high=hit.z,clear=true;
+    for(let side=0;side<16;side++){const a=f(f(side*PI)/8),h=terrain.hit({x:p.x+f(cos(a)*extent),y:p.y+f(sin(a)*extent)});if(!h||h.normal<f(.9)){clear=false;break;}low=Math.min(low,h.z);high=Math.max(high,h.z);}
+    if(!clear||high-low>radius*.1)continue;centre={...p,z:high+8,radius,yaw:r.integer(0,359),deep:i%3===0,yellow:i%2===0};break;
+   }
+   if(!centre)throw Error('Could not place expanded toxic pool '+world+':'+i);toxicPools.push(centre);points.push({kind:'Toxic pool',id:toxicPools.length-1,x:centre.x/100,y:centre.y/100,z:centre.z/100,radius:centre.radius/100,yaw:centre.yaw,deep:centre.deep,yellow:centre.yellow,remaining:1});
+  }
+ }
  const {collision,...base}=asset;return {...base,points,villageRoute:{houses:routeHouses,keys:routeKeys},worldSeed:seed,worldGeneratorVersion:version,seedId:`HS${version}-${seed}`,mapMode:'initial-world',snapshot:`Initial world · HS${version}-${seed} · no saved progress`};
 }

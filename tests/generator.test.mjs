@@ -8,7 +8,7 @@ for(const bad of ['','HS3-1','HS1-0','HS1--1','HS1-2147483648','HS1-1x'])assert.
 assert.equal(parseSeed(' hs1-42 '),42);
 for(const ref of references){
  const map=generateWorld(ref.seed,assets);
- assert.equal(map.points.length,ref.points.length+18+288+40+5+3456+64+96+192+60+map.points.filter(p=>p.kind==='Enemy'&&p.id>=800).length+map.points.filter(p=>p.kind==='Flying enemy').length+map.points.filter(p=>['Abandoned house','Cabin medkit','Frontier ruin','Frontier medkit','Frontier ammo'].includes(p.kind)).length,ref.seed+' doubled resource count');
+ assert.equal(map.points.length,ref.points.length+90+288+40+5+3456+64+96+192+60+map.points.filter(p=>p.kind==='Enemy'&&p.id>=800).length+map.points.filter(p=>p.kind==='Flying enemy').length+map.points.filter(p=>['Abandoned house','Cabin medkit','Frontier ruin','Frontier medkit','Frontier ammo'].includes(p.kind)).length,ref.seed+' doubled resource count');
  for(const [kind,id,oldX,y] of ref.points){
   // Opening the eastern ridge changes slope-based World 2 vegetation selection.
   if(kind==='Vitraleaf'&&id>=48)continue;
@@ -212,8 +212,15 @@ console.log('300 solitary Blender encounters match native positions and retain i
 
 const poolRef=JSON.parse(readFileSync(new URL('./toxic-pools-reference.json',import.meta.url)));
 const poolMap=generateWorld(poolRef.seed,JSON.parse(readFileSync(new URL('../assets/world-hs2.json',import.meta.url))));
-const pools=poolMap.points.filter(p=>p.kind==='Toxic pool');assert.equal(pools.length,18);
-for(let i=0;i<pools.length;i++){const p=pools[i],r=poolRef.pools[i];assert.equal(p.x,r.x);assert.equal(p.y,r.y);assert.equal(p.yaw,r.yaw);assert.equal(p.deep,r.deep);assert.equal(p.yellow,r.yellow);const reach=p.radius*2.3;
+const pools=poolMap.points.filter(p=>p.kind==='Toxic pool');assert.equal(pools.length,90);
+for(let i=0;i<poolRef.pools.length;i++){const p=pools[i],r=poolRef.pools[i];assert.equal(p.x,r.x);assert.equal(p.y,r.y);assert.equal(p.yaw,r.yaw);assert.equal(p.deep,r.deep);assert.equal(p.yellow,r.yellow);const reach=p.radius*2.3;
  for(const other of poolMap.points){if(['Enemy','Flying enemy'].includes(other.kind))assert.ok(Math.hypot(p.x-other.x,p.y-other.y)>=reach+44.99);if(['Hydrite','Verdite','Vitraleaf','Glass'].includes(other.kind))assert.ok(Math.hypot(p.x-other.x,p.y-other.y)>=reach+3.49);}
 }
 console.log('All 18 toxic pools match native positions, types, exit headings and resource/enemy spacing.');
+
+const densePoolRef=JSON.parse(readFileSync(new URL('./toxic-pools-density-reference.json',import.meta.url)));
+for(let i=0;i<pools.length;i++){const p=pools[i],r=densePoolRef.pools[i];assert.equal(p.x,r.x,'pool '+i+' x');assert.equal(p.y,r.y,'pool '+i+' y');assert.equal(p.radius,r.radius);assert.equal(p.yaw,r.yaw);assert.equal(p.deep,r.deep);assert.equal(p.yellow,r.yellow);
+ for(const q of poolMap.points){const d=Math.hypot(p.x-q.x,p.y-q.y),reach=p.radius*2.3;if(['Enemy','Flying enemy'].includes(q.kind))assert.ok(d>=reach+14.99);if(['Iron','Bronze','Asterium','Vesperite','Sulphrite','Cobaltite','Pyronite','Crythium'].includes(q.kind))assert.ok(d>=reach+11.99);if(['Hydrite','Verdite','Vitraleaf','Glass'].includes(q.kind))assert.ok(d>=reach+3.49);}
+}
+for(const [seed,asset] of [['HS1-1',assets],['HS2-123456789',JSON.parse(readFileSync(new URL('../assets/world-hs2.json',import.meta.url)))]]){const p=generateWorld(seed,asset).points.filter(p=>p.kind==='Toxic pool');for(let w=0;w<3;w++){const group=p.filter(q=>Math.abs(q.x-w*4000)<2000);assert.equal(group.length,30);assert.ok(group.some(q=>q.radius>=18));}}
+console.log('All 90 pools match native placement; thirty per world with large lakes and non-overlapping resource/enemy clearance.');

@@ -57,3 +57,5 @@ World 2 fauna: sixteen seeded packs of 2-4 Riftstalkers (120 HP), Prismbacks (18
 Northern service house: one solar-powered safe room in the northern World 2 wildlife area. Initial location is generated with the same enemy, resource and terrain checks as Unreal. Its in-game mission appears ten played minutes after opening the upper Spire cache; the public map is a spoiler and shows the initial house location.
 
 HS2 retains the HS1 random streams and Worlds 1/2, and adds World 3 interior hills, six small peaks and six booster shelves. Both terrain assets remain versioned; old HS1 bookmarks retain their original ground. HS2 fauna is checked against a fresh native export. Launch foundations and the World 3 pass retain identical collision heights.
+
+Toxic pools: thirty per world (ninety total), preserving the original six and appending mixed-size basins on independent streams. Water can reach about forty metres across where terrain and resource/enemy clearance allow it. The density fixture compares every native position, radius, exit heading and colour. The generator uses spatial buckets for the denser search.
