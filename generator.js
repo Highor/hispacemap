@@ -212,5 +212,26 @@ export function generateWorld(seedText,asset){
   if(index%4===3)continue;const a=p.yaw*Math.PI/180;
   points.push({kind:index%4===0?'Frontier medkit':'Frontier ammo',id:frontierLoot++,x:p.x-2.72*Math.cos(a)-1.6*Math.sin(a),y:p.y-2.72*Math.sin(a)+1.6*Math.cos(a),z:p.z+.288,remaining:1});
  }
+ // Independent streams append solitary encounters without moving original packs or POIs.
+ const soloSiteKinds=['Medical regulator','Southern crash field','Asterion Spire','Outpost cabin','Settlement capsule','Abandoned house','Frontier ruin','North relay','The Hollow Foundry','The Sable Crucible','The Obsidian Vault','The Final Bastion / Launch Control','Rocket launch site'];
+ const soloSites=points.filter(p=>soloSiteKinds.includes(p.kind)).map(p=>({x:p.x*100,y:p.y*100}));
+ soloSites.push({x:603000,y:0},{x:213000,y:2600},{x:200000,y:0});
+ const soloFoes=points.filter(p=>['Enemy','Flying enemy'].includes(p.kind)).map(p=>({x:p.x*100,y:p.y*100}));
+ for(let world=2;world<=3;world++){
+  const rng=random(world===2?11827:13827),count=world===2?100:200,first=world===2?11000:11100;
+  for(let i=0;i<count;i++){
+   let centre=null;
+   for(let attempt=0;attempt<20000;attempt++){
+    const p={x:f(rng.range(world===2?217000:615000,world===2?583000:985000)),y:f(rng.range(-183000,183000))};
+    if(Math.hypot(p.x-(world===2?400000:800000),p.y)>183000||(p.x>=578000&&p.x<=622000&&Math.abs(p.y)<=14000)||soloSites.some(q=>distance(p,q)<10000)||soloFoes.some(q=>distance(p,q)<6000))continue;
+    const ground=terrain.hit(p);if(!ground||ground.normal<f(.9))continue;let clear=true;
+    for(let side=0;side<8;side++){const a=f(f(side*PI)/4),rim=terrain.hit({x:p.x+f(cos(a)*180),y:p.y+f(sin(a)*180)});if(!rim||rim.normal<f(.88)||Math.abs(rim.z-ground.z)>80){clear=false;break;}}
+    if(clear){centre=p;break;}
+   }
+   if(!centre)throw Error(`Could not place solitary enemy ${world}:${i}.`);
+   soloFoes.push(centre);const type=world===2?i%4+1:i%9+1,names=['','Riftstalker','Prismback','Ashmaw','Duskmantis','Cinderclaw','Frostspine','Ironhide','Voidstrider','Embermaw'];
+   points.push({kind:'Enemy',species:names[type],solitary:true,pack:2000+first-11000+i,id:first+i,x:centre.x/100,y:centre.y/100,z:terrain.height(centre)/100+.9,remaining:type>=5?180+(type-5)*40:[100,120,180,240,150][type]});
+  }
+ }
  const {collision,...base}=asset;return {...base,points,villageRoute:{houses:routeHouses,keys:routeKeys},worldSeed:seed,worldGeneratorVersion:version,seedId:`HS${version}-${seed}`,mapMode:'initial-world',snapshot:`Initial world · HS${version}-${seed} · no saved progress`};
 }

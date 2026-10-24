@@ -199,3 +199,13 @@ for(const [seed,af] of [['HS1-42',assets],['HS2-201026',hs2],['HS2-123456789',hs
  for(const p of plants)assert.ok(new Terrain(af.collision).hit({x:p.x*100,y:p.y*100}).normal>=.9-1e-6);
 }
 console.log('288 native-matching World 3 plants and doubled small enemy packs verified.');
+
+const solitaryNative=JSON.parse(readFileSync(new URL('./solitary-fauna-reference.json',import.meta.url),'utf8').replace(/^\uFEFF/,''));
+for(const p of solitaryNative){const q=second.points.find(q=>q.solitary&&q.id===p.id);assert.ok(q&&Math.hypot(q.x-p.x,q.y-p.y)<.025,'Solitary enemy differs from native '+p.id);}
+for(const [seed,af] of [['HS1-42',assets],['HS2-201026',hs2],['HS2-123456789',hs2]]){
+ const ps=generateWorld(seed,af).points,singles=ps.filter(p=>p.solitary),foes=ps.filter(p=>['Enemy','Flying enemy'].includes(p.kind));
+ assert.equal(singles.filter(p=>p.id<11100).length,100);assert.equal(singles.filter(p=>p.id>=11100).length,200);
+ assert.equal(new Set(singles.map(p=>p.pack)).size,300);
+ for(const p of singles)for(const q of foes)if(p!==q)assert.ok(Math.hypot(p.x-q.x,p.y-q.y)>=59.99,'Solitary enemies remain separate from existing packs and each other');
+}
+console.log('300 solitary Blender encounters match native positions and retain independent placement across fixture seeds.');
