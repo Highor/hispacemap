@@ -1,0 +1,149 @@
+{
+  "seed": "HS2-201026",
+  "pools": [
+    {
+      "x": 822.0,
+      "y": 277.0,
+      "radius": 7.0,
+      "yaw": 98.0,
+      "deep": true,
+      "yellow": true
+    },
+    {
+      "x": -1066.0,
+      "y": 528.0,
+      "radius": 8.5,
+      "yaw": 351.0,
+      "deep": false,
+      "yellow": false
+    },
+    {
+      "x": 864.0,
+      "y": 1420.0,
+      "radius": 10.0,
+      "yaw": 119.0,
+      "deep": false,
+      "yellow": true
+    },
+    {
+      "x": -11.0,
+      "y": 1335.0,
+      "radius": 11.5,
+      "yaw": 8.0,
+      "deep": true,
+      "yellow": false
+    },
+    {
+      "x": 1290.0,
+      "y": 460.0,
+      "radius": 7.0,
+      "yaw": 349.0,
+      "deep": false,
+      "yellow": true
+    },
+    {
+      "x": -1204.0,
+      "y": -950.0,
+      "radius": 8.5,
+      "yaw": 135.0,
+      "deep": false,
+      "yellow": false
+    },
+    {
+      "x": 4473.0,
+      "y": -1461.0,
+      "radius": 7.0,
+      "yaw": 315.0,
+      "deep": true,
+      "yellow": true
+    },
+    {
+      "x": 3705.0,
+      "y": 1531.0,
+      "radius": 8.5,
+      "yaw": 132.0,
+      "deep": false,
+      "yellow": false
+    },
+    {
+      "x": 4081.0,
+      "y": -443.0,
+      "radius": 10.0,
+      "yaw": 109.0,
+      "deep": false,
+      "yellow": true
+    },
+    {
+      "x": 4897.0,
+      "y": -565.0,
+      "radius": 11.5,
+      "yaw": 279.0,
+      "deep": true,
+      "yellow": false
+    },
+    {
+      "x": 5221.0,
+      "y": -694.0,
+      "radius": 7.0,
+      "yaw": 220.0,
+      "deep": false,
+      "yellow": true
+    },
+    {
+      "x": 3572.0,
+      "y": 654.0,
+      "radius": 8.5,
+      "yaw": 328.0,
+      "deep": false,
+      "yellow": false
+    },
+    {
+      "x": 8829.0,
+      "y": 470.0,
+      "radius": 7.0,
+      "yaw": 294.0,
+      "deep": true,
+      "yellow": true
+    },
+    {
+      "x": 7245.0,
+      "y": -708.0,
+      "radius": 8.5,
+      "yaw": 302.0,
+      "deep": false,
+      "yellow": false
+    },
+    {
+      "x": 6817.0,
+      "y": -230.0,
+      "radius": 10.0,
+      "yaw": 316.0,
+      "deep": false,
+      "yellow": true
+    },
+    {
+      "x": 9229.0,
+      "y": -544.0,
+      "radius": 11.5,
+      "yaw": 189.0,
+      "deep": true,
+      "yellow": false
+    },
+    {
+      "x": 8583.0,
+      "y": -1424.0,
+      "radius": 7.0,
+      "yaw": 187.0,
+      "deep": false,
+      "yellow": true
+    },
+    {
+      "x": 7443.0,
+      "y": -1148.0,
+      "radius": 8.5,
+      "yaw": 184.0,
+      "deep": false,
+      "yellow": false
+    }
+  ]
+}

@@ -233,5 +233,24 @@ export function generateWorld(seedText,asset){
    points.push({kind:'Enemy',species:names[type],solitary:true,pack:2000+first-11000+i,id:first+i,x:centre.x/100,y:centre.y/100,z:terrain.height(centre)/100+.9,remaining:type>=5?180+(type-5)*40:[100,120,180,240,150][type]});
   }
  }
+ // Seeded toxic mineral basins append after all existing resources and encounters.
+ const poolSiteKinds=['Base','Cache 1','Cache 2','Cache 3','Suit pod','Research','Mining cache',...soloSiteKinds];
+ const poolSites=points.filter(p=>poolSiteKinds.includes(p.kind)).map(p=>({x:p.x*100,y:p.y*100}));poolSites.push({x:603000,y:0},{x:213000,y:2600},{x:200000,y:0});
+ const poolResources=points.filter(p=>['Hydrite','Verdite','Vitraleaf','Glass'].includes(p.kind)).map(p=>({x:p.x*100,y:p.y*100}));
+ const poolOres=points.filter(p=>['Iron','Bronze','Asterium','Vesperite','Sulphrite','Cobaltite','Pyronite','Crythium'].includes(p.kind)).map(p=>({x:p.x*100,y:p.y*100}));
+ const poolFoes=points.filter(p=>['Enemy','Flying enemy'].includes(p.kind)).map(p=>({x:p.x*100,y:p.y*100}));const toxicPools=[];
+ for(let world=1;world<=3;world++){const r=random(15900+world),origin=(world-1)*400000;
+  for(let i=0;i<6;i++){const radius=700+i%4*150,extent=f(radius*f(2.3));let centre=null;
+   for(let attempt=0;attempt<40000;attempt++){
+    const p={x:origin+r.integer(-1700,1700)*100,y:r.integer(-1700,1700)*100};
+    if(Math.hypot(p.x-origin,p.y)>170000||Math.abs(p.y)<12000||(world===1&&p.x>180000)||(p.x>=578000&&p.x<=622000&&Math.abs(p.y)<=14000))continue;
+    if(poolSites.some(q=>distance(p,q)<extent+10000)||poolFoes.some(q=>distance(p,q)<extent+4500)||poolOres.some(q=>distance(p,q)<extent+1200)||poolResources.some(q=>distance(p,q)<extent+350)||toxicPools.some(q=>distance(p,q)<extent+q.radius*2.3+15000))continue;
+    const hit=terrain.hit(p);if(!hit||hit.normal<f(.97))continue;let low=hit.z,high=hit.z,clear=true;
+    for(let side=0;side<16;side++){const a=f(f(side*PI)/8),h=terrain.hit({x:p.x+f(cos(a)*extent),y:p.y+f(sin(a)*extent)});if(!h||h.normal<f(.95)){clear=false;break;}low=Math.min(low,h.z);high=Math.max(high,h.z);}
+    if(!clear||high-low>100)continue;centre={...p,z:high+8,radius,yaw:r.integer(0,359),deep:i%3===0,yellow:i%2===0};break;
+   }
+   if(!centre)throw Error('Could not place toxic pool '+world+':'+i);toxicPools.push(centre);points.push({kind:'Toxic pool',id:toxicPools.length-1,x:centre.x/100,y:centre.y/100,z:centre.z/100,radius:radius/100,yaw:centre.yaw,deep:centre.deep,yellow:centre.yellow,remaining:1});
+  }
+ }
  const {collision,...base}=asset;return {...base,points,villageRoute:{houses:routeHouses,keys:routeKeys},worldSeed:seed,worldGeneratorVersion:version,seedId:`HS${version}-${seed}`,mapMode:'initial-world',snapshot:`Initial world · HS${version}-${seed} · no saved progress`};
 }
