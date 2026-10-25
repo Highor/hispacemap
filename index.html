@@ -39,10 +39,10 @@ button,input{font:inherit;color:inherit;background:#0d2635;border:1px solid #3c6
 .hp-filter i{flex-shrink:0}
 </style>
  <script type="module">
- import {generateWorld} from "./generator.js?v=world-four-ponds-1";
+ import {generateWorld} from "./generator.js?v=world-four-fauna-1";
  (async()=>{
  const root=document.getElementById('hispace-world-map'), svg=root.querySelector('.hp-map'), ns='http://www.w3.org/2000/svg';
- const responses=await Promise.all([1,2].map(v=>fetch(`./assets/world-hs${v}.json?v=world-four-ponds-1`)));if(responses.some(r=>!r.ok))throw Error('Terrain could not be loaded. Please reload the page.');
+ const responses=await Promise.all([1,2].map(v=>fetch(`./assets/world-hs${v}.json?v=world-four-fauna-1`)));if(responses.some(r=>!r.ok))throw Error('Terrain could not be loaded. Please reload the page.');
  const assets=await Promise.all(responses.map(r=>r.json()));
  const assetFor=seed=>assets[String(seed).trim().toUpperCase().startsWith('HS2-')?1:0];
  const requested=new URLSearchParams(location.search).get('seedid')||new URLSearchParams(location.search).get('seed')||'HS2-123456789';
@@ -79,6 +79,7 @@ button,input{font:inherit;color:inherit;background:#0d2635;border:1px solid #3c6
  let worldFourView=false;let cx=4000,cy=0,half=6800,w=700,h=590,selected=null,drag=null,moved=false;
  const make=(tag,attrs,parent=svg)=>{const n=document.createElementNS(ns,tag);for(const k in attrs)n.setAttribute(k,attrs[k]);parent.append(n);return n};
  const mx=x=>x;
+ const mapPoints=()=>worldFourView?data.points.concat(data.worldFour?.fauna||[]):data.points;
  const color=p=>groups.find(g=>g[2]===groupFor(p))?.[1]||'var(--foreground)';
  let sx,sy,scale,L=46,T=16,R,B;
 
@@ -120,7 +121,7 @@ button,input{font:inherit;color:inherit;background:#0d2635;border:1px solid #3c6
   if(Math.abs(tx-x)>12||Math.abs(ty-y)>20)make('line',{x1:x,y1:y,x2:tx,y2:ty-4,stroke:'var(--foreground)','stroke-width':.65,opacity:.45,'data-feature':'label-leader'},field);
   const label=make('text',{x:tx,y:ty,'text-anchor':'middle','paint-order':'stroke',stroke:'var(--background)','stroke-width':3,'data-feature':'marker-label'},field);label.textContent=text;
  };
- const ordered=data.points.filter(isVisible).sort((a,b)=>(groups.some(g=>g[2]===a.kind)?0:1)-(groups.some(g=>g[2]===b.kind)?0:1));
+ const ordered=mapPoints().filter(isVisible).sort((a,b)=>(groups.some(g=>g[2]===a.kind)?0:1)-(groups.some(g=>g[2]===b.kind)?0:1));
  for(const p of ordered){const x=sx(mx(p.x)),y=sy(p.y);if(x<L-10||x>R+10||y<T-10||y>B+10)continue;const res=['Hydrite','Verdite','Vitraleaf'].includes(p.kind),ore=['Iron','Bronze','Asterium','Vesperite','Sulphrite','Cobaltite','Pyronite','Crythium'].includes(p.kind);const r=res?2:ore?5:p.kind==='Glass'?3:6;const a={'data-kind':p.kind,'data-species':p.species||'','data-world':p.x>=2000?'2':'1',fill:p.remaining?color(p):'var(--background)',stroke:color(p),'stroke-width':p.remaining?.7:1.4,opacity:res?.7:1};
  if(ore)make('rect',{x:x-r,y:y-r,width:r*2,height:r*2,...a},field);else if(p.kind==='Glass')make('path',{d:`M${x} ${y-r}l${r} ${r}l${-r} ${r}l${-r} ${-r}Z`,...a},field);else if(res||p.kind==='Enemy'||p.kind==='Flying enemy')make('circle',{cx:x,cy:y,r,...a},field);else make('path',{d:`M${x} ${y-r-2}l${r+1} ${r*2+2}h${-2*r-2}Z`,...a},field);
  if((w>=600||half<1600||p.kind==='Base')&&(!(p.id>=100&&['Enemy','Flying enemy'].includes(p.kind))||half<600)&&!res&&!ore&&p.kind!=='Glass'&&(half<1600||['Base','Research','Future impact','Impact site','Tunnel 1','Enemy','Northwest outpost','Asterion Spire','World 4 crash','World 4 recovery cache'].includes(p.kind))&&(half<600||!['Cache 1','Cache 2','Cache 3','Smelter','Player'].includes(p.kind))){markerLabel((p.species||names[p.kind]||p.kind)+(p.kind==='Settlement capsule'?' '+(p.id+1):''),x,y,p.kind.startsWith('Tunnel'));}
@@ -135,8 +136,9 @@ button,input{font:inherit;color:inherit;background:#0d2635;border:1px solid #3c6
  svg.addEventListener('wheel',e=>{e.preventDefault();zoom(e.deltaY>0?1.2:1/1.2);},{passive:false});
  svg.addEventListener('pointerdown',e=>{drag={x:e.clientX,y:e.clientY,cx,cy};moved=false;svg.setPointerCapture(e.pointerId);});
  svg.addEventListener('pointermove',e=>{if(!drag)return;const rect=svg.getBoundingClientRect(),dx=(e.clientX-drag.x)*w/rect.width,dy=(e.clientY-drag.y)*h/rect.height;if(Math.hypot(dx,dy)>4)moved=true;if(moved){cx=drag.cx-dx/scale;cy=drag.cy-dy/scale;draw();}});
- svg.addEventListener('pointerup',e=>{drag=null;if(moved)return;const rect=svg.getBoundingClientRect(),px=(e.clientX-rect.left)*w/rect.width,py=(e.clientY-rect.top)*h/rect.height;let best=null,dist=24;for(const p of data.points.filter(isVisible)){const d=Math.hypot(sx(mx(p.x))-px,sy(p.y)-py);if(d<dist){best=p;dist=d;}}if(best){selected=best;const state=['Enemy','Flying enemy'].includes(best.kind)?`${best.remaining} HP`:(best.remaining?'Available':'Empty / collected');root.querySelector('.hp-detail').textContent=`${best.species||names[best.kind]||best.kind} · E ${Math.round(best.x)} m / N ${Math.round(-best.y)} m · ${state}`;draw();}});
+ svg.addEventListener('pointerup',e=>{drag=null;if(moved)return;const rect=svg.getBoundingClientRect(),px=(e.clientX-rect.left)*w/rect.width,py=(e.clientY-rect.top)*h/rect.height;let best=null,dist=24;for(const p of mapPoints().filter(isVisible)){const d=Math.hypot(sx(mx(p.x))-px,sy(p.y)-py);if(d<dist){best=p;dist=d;}}if(best){selected=best;const state=['Enemy','Flying enemy'].includes(best.kind)?`${best.remaining} HP`:(best.remaining?'Available':'Empty / collected');root.querySelector('.hp-detail').textContent=`${best.species||best.species||names[best.kind]||best.kind} · E ${Math.round(best.x-(worldFourView?20000:0))} m / N ${Math.round(-best.y)} m · ${state}`;draw();}});
  svg.addEventListener('pointercancel',()=>{drag=null;});new ResizeObserver(draw).observe(root);draw();
  })().catch(error=>{document.querySelector('.hp-seed-status').textContent=error.message;});
  </script>
-</div><footer style="max-width:1396px;margin:0 auto">HS1 / HS2 generators · Initial world layout. Saved progress is separate. Bookmark the URL to keep your seed.<br>HISPACE · Highor</footer></body></html>
+</div>
+<footer style="max-width:1396px;margin:0 auto">HS1 / HS2 generators · Initial world layout. Saved progress is separate. Bookmark the URL to keep your seed.<br>HISPACE · Highor</footer></body></html>
