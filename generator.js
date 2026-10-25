@@ -19,6 +19,7 @@ const cell=(axis,value)=>{let lo=0,hi=axis.length-1;while(lo+1<hi){const mid=(lo
 export class Terrain{
  constructor(grids){this.grids=grids;}
  hit(p){
+  if(p.x>=1800000&&p.x<=2200000&&Math.abs(p.y)<=200000){const x=p.x-2000000,y=p.y;let q=Math.max(0,Math.min(1,(Math.hypot(x,y)-6000)/10000));q=q*q*(3-2*q);return {z:q*(600*Math.sin(x/18000)*Math.cos(y/23000)+220*Math.sin(x/4500)*Math.cos(y/5500)+110*Math.sin((x+y)/3200)),normal:1};}
   const second=p.x>=200000&&p.x<600000&&Math.abs(p.y)<=250000;
   const third=p.x>=600000&&p.x<=1050000&&Math.abs(p.y)<=250000;
   if(!second&&!third&&(Math.abs(p.x)>250000||Math.abs(p.y)>250000))return null;

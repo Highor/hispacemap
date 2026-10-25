@@ -8,7 +8,7 @@ for(const bad of ['','HS3-1','HS1-0','HS1--1','HS1-2147483648','HS1-1x'])assert.
 assert.equal(parseSeed(' hs1-42 '),42);
 for(const ref of references){
  const map=generateWorld(ref.seed,assets);
- assert.equal(map.points.length,ref.points.length+90+288+40+5+3456+64+96+192+60+map.points.filter(p=>p.kind==='Enemy'&&p.id>=800).length+map.points.filter(p=>p.kind==='Flying enemy').length+map.points.filter(p=>['Abandoned house','Cabin medkit','Frontier ruin','Frontier medkit','Frontier ammo'].includes(p.kind)).length,ref.seed+' doubled resource count');
+ assert.equal(map.points.length,ref.points.length+2+90+288+40+5+3456+64+96+192+60+map.points.filter(p=>p.kind==='Enemy'&&p.id>=800).length+map.points.filter(p=>p.kind==='Flying enemy').length+map.points.filter(p=>['Abandoned house','Cabin medkit','Frontier ruin','Frontier medkit','Frontier ammo'].includes(p.kind)).length,ref.seed+' doubled resource count');
  for(const [kind,id,oldX,y] of ref.points){
   // Opening the eastern ridge changes slope-based World 2 vegetation selection.
   if(kind==='Vitraleaf'&&id>=48)continue;
@@ -224,3 +224,5 @@ for(let i=0;i<pools.length;i++){const p=pools[i],r=densePoolRef.pools[i];assert.
 }
 for(const [seed,asset] of [['HS1-1',assets],['HS2-123456789',JSON.parse(readFileSync(new URL('../assets/world-hs2.json',import.meta.url)))]]){const p=generateWorld(seed,asset).points.filter(p=>p.kind==='Toxic pool');for(let w=0;w<3;w++){const group=p.filter(q=>Math.abs(q.x-w*4000)<2000);assert.equal(group.length,30);assert.ok(group.some(q=>q.radius>=18));}}
 console.log('All 90 pools match native placement; thirty per world with large lakes and non-overlapping resource/enemy clearance.');
+
+const green=generateWorld("HS2-42",JSON.parse(readFileSync(new URL("../assets/world-hs2.json",import.meta.url))));assert.equal(green.worldFour.diameter,4000);assert.equal(green.points.filter(p=>p.kind==="Return-link signal").length,1);assert.equal(green.points.filter(p=>p.kind==="World 4 crash").length,1);assert.equal(green.worldFour.terrain.length,1089);
