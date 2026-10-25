@@ -115,14 +115,22 @@ button,input{font:inherit;color:inherit;background:#0d2635;border:1px solid #3c6
   if(Math.abs(tx-x)>12||Math.abs(ty-y)>20)make('line',{x1:x,y1:y,x2:tx,y2:ty-4,stroke:'var(--foreground)','stroke-width':.65,opacity:.45,'data-feature':'label-leader'},field);
   const label=make('text',{x:tx,y:ty,'text-anchor':'middle','paint-order':'stroke',stroke:'var(--background)','stroke-width':3,'data-feature':'marker-label'},field);label.textContent=text;
  };
- const ordered=data.points.filter(isVisible).sort((a,b)=>(groups.some(g=>g[2]===a.kind)?0:1)-(groups.some(g=>g[2]===b.kind)?0:1));
+ const priority=p=>dungeonKinds.has(p.kind)?0:p.kind==='Base'?1:p.kind==='Small capsule'?2:3;
+ const ordered=data.points.filter(isVisible).sort((a,b)=>priority(a)-priority(b));
+ const clusters=[];
  for(const p of ordered){const x=sx(mx(p.x)),y=sy(p.y);if(x<L-10||x>R+10||y<T-10||y>B+10)continue;const res=['Hydrite','Verdite','Vitraleaf'].includes(p.kind),ore=['Iron','Bronze','Asterium','Vesperite','Sulphrite','Cobaltite','Pyronite','Crythium'].includes(p.kind);const r=res?2:ore?5:p.kind==='Glass'?3:6;const a={'data-kind':p.kind,'data-species':p.species||'','data-world':p.x>=2000?'2':'1',fill:p.remaining?color(p):'var(--background)',stroke:color(p),'stroke-width':p.remaining?.7:1.4,opacity:res?.7:1};
- if(p.kind==='Toxic pool'){make('ellipse',{cx:x,cy:y,rx:Math.max(5,p.radius*scale*.62),ry:Math.max(4,p.radius*scale*.5),...a,fill:p.yellow?'#b4a72a':'#558b32',stroke:p.yellow?'#e5d55a':'#92c75c','data-feature':'toxic-pool'},field);}
- else if(p.kind==='Small capsule'){make('circle',{cx:x,cy:y,r:5,...a,fill:'#fff',stroke:'#fff','data-symbol':'safe-capsule'},field);make('path',{d:`M${x+6} ${y-4}h6v5l-3 3-3-3Z`,fill:'var(--background)',stroke:'#fff','stroke-width':1.4,'data-symbol':'safe-shield'},field);}
- else if(dungeonKinds.has(p.kind))make('path',{d:`M${x-6} ${y+5}v-9h3v-3h6v3h3v9Z M${x} ${y+4}v-5`,...a,fill:'var(--background)',stroke:'#fff','stroke-width':2,'data-symbol':'dungeon'},field);
- else if(ore)make('rect' ,{x:x-r,y:y-r,width:r*2,height:r*2,...a},field);else if(p.kind==='Glass')make('path',{d:`M${x} ${y-r}l${r} ${r}l${-r} ${r}l${-r} ${-r}Z`,...a},field);else if(res||p.kind==='Enemy'||p.kind==='Flying enemy')make('circle',{cx:x,cy:y,r,...a},field);else make('path',{d:`M${x} ${y-r-2}l${r+1} ${r*2+2}h${-2*r-2}Z`,...a},field);
+ const clusterable=half>=1600&&(p.kind==='Small capsule'||dungeonKinds.has(p.kind));
+ if(clusterable){const near=clusters.find(c=>Math.hypot(c.x-x,c.y-y)<24);if(near){near.count++;continue;}}
+ const symbol=make('g',{'aria-label':p.species||names[p.kind]||p.kind,role:'img'},field);
+ const title=make('title',{},symbol);title.textContent=`${p.species||names[p.kind]||p.kind} · E ${Math.round(p.x)} m / N ${Math.round(-p.y)} m`;
+ if(clusterable)clusters.push({x,y,count:1,symbol,title,name:p.species||names[p.kind]||p.kind});
+ if(p.kind==='Toxic pool'){make('ellipse',{cx:x,cy:y,rx:Math.max(5,p.radius*scale*.62),ry:Math.max(4,p.radius*scale*.5),...a,fill:p.yellow?'#b4a72a':'#558b32',stroke:p.yellow?'#e5d55a':'#92c75c','data-feature':'toxic-pool'},symbol);}
+ else if(p.kind==='Small capsule'){make('circle',{cx:x,cy:y,r:5,...a,fill:'#fff',stroke:'#fff','data-symbol':'safe-capsule'},symbol);make('path',{d:`M${x+6} ${y-4}h6v5l-3 3-3-3Z`,fill:'var(--background)',stroke:'#fff','stroke-width':1.4,'data-symbol':'safe-shield'},symbol);}
+ else if(dungeonKinds.has(p.kind))make('path',{d:`M${x-6} ${y+5}v-9h3v-3h6v3h3v9Z M${x} ${y+4}v-5`,...a,fill:'var(--background)',stroke:'#fff','stroke-width':2,'data-symbol':'dungeon'},symbol);
+ else if(ore)make('rect' ,{x:x-r,y:y-r,width:r*2,height:r*2,...a},symbol);else if(p.kind==='Glass')make('path',{d:`M${x} ${y-r}l${r} ${r}l${-r} ${r}l${-r} ${-r}Z`,...a},symbol);else if(res||p.kind==='Enemy'||p.kind==='Flying enemy')make('circle',{cx:x,cy:y,r,...a},symbol);else make('path',{d:`M${x} ${y-r-2}l${r+1} ${r*2+2}h${-2*r-2}Z`,...a},symbol);
  if((w>=600||half<1600||p.kind==='Base')&&(!(p.id>=100&&['Enemy','Flying enemy'].includes(p.kind))||half<600)&&!res&&!ore&&p.kind!=='Glass'&&(half<1600||['Base','Research','Future impact','Impact site','Tunnel 1','Enemy','Northwest outpost','Asterion Spire'].includes(p.kind))&&(half<600||!['Cache 1','Cache 2','Cache 3','Smelter','Player'].includes(p.kind))){markerLabel((p.species||names[p.kind]||p.kind)+(p.kind==='Settlement capsule'?' '+(p.id+1):''),x,y,p.kind.startsWith('Tunnel'));}
  }
+ for(const c of clusters)if(c.count>1){const badge=make('text',{x:c.x+10,y:c.y+14,fill:'var(--foreground)','paint-order':'stroke',stroke:'var(--background)','stroke-width':3,'data-feature':'location-cluster'},c.symbol);badge.textContent=c.count;c.title.textContent=c.name+` + ${c.count-1} nearby locations`;}
  if(selected){make('circle',{cx:sx(mx(selected.x)),cy:sy(selected.y),r:12,fill:'none',stroke:'var(--foreground)','stroke-width':2},field);}
  make('rect',{x:L,y:T,width:R-L,height:B-T,fill:'none',stroke:'var(--border)'});
  }
