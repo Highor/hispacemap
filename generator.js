@@ -19,7 +19,7 @@ const cell=(axis,value)=>{let lo=0,hi=axis.length-1;while(lo+1<hi){const mid=(lo
 export class Terrain{
  constructor(grids){this.grids=grids;}
  hit(p){
-  if(p.x>=1800000&&p.x<=2200000&&Math.abs(p.y)<=200000){const x=p.x-2000000,y=p.y;let q=Math.max(0,Math.min(1,(Math.hypot(x,y)-6000)/10000));q=q*q*(3-2*q);return {z:q*(600*Math.sin(x/18000)*Math.cos(y/23000)+220*Math.sin(x/4500)*Math.cos(y/5500)+110*Math.sin((x+y)/3200)),normal:1};}
+  if(p.x>=1800000&&p.x<=2200000&&Math.abs(p.y)<=200000)return {z:worldFourHeight(p.x-2000000,p.y),normal:1};
   const second=p.x>=200000&&p.x<600000&&Math.abs(p.y)<=250000;
   const third=p.x>=600000&&p.x<=1050000&&Math.abs(p.y)<=250000;
   if(!second&&!third&&(Math.abs(p.x)>250000||Math.abs(p.y)>250000))return null;
@@ -271,5 +271,14 @@ export function generateWorld(seedText,asset){
    if(!centre)throw Error('Could not place expanded toxic pool '+world+':'+i);toxicPools.push(centre);points.push({kind:'Toxic pool',id:toxicPools.length-1,x:centre.x/100,y:centre.y/100,z:centre.z/100,radius:centre.radius/100,yaw:centre.yaw,deep:centre.deep,yellow:centre.yellow,remaining:1});
   }
  }
- const {collision,...base}=asset;return {...base,points,villageRoute:{houses:routeHouses,keys:routeKeys},worldSeed:seed,worldGeneratorVersion:version,seedId:`HS${version}-${seed}`,mapMode:'initial-world',snapshot:`Initial world · HS${version}-${seed} · no saved progress`};
+ const {collision,...base}=asset;return {...base,points,villageRoute:{houses:routeHouses,keys:routeKeys},worldSeed:seed,worldGeneratorVersion:version,seedId:`HS${version}-${seed}`,mapMode:'initial-world',snapshot:`Initial world Â· HS${version}-${seed} Â· no saved progress`};
 }
+
+const w4s=(a,b,x)=>{let t=Math.max(0,Math.min(1,(x-a)/(b-a)));return t*t*(3-2*t);};
+export function worldFourRiver(i,x,y){let a=i<2?y:x;if(Math.abs(a)>(i<2?172000:125000))return null;let c,half,depth,fords,shallow;
+ if(i===0){c=52000+16000*Math.sin(a/36000)+6500*Math.sin(a/15000);half=1700+900*(.5+.5*Math.sin(a/27000));depth=240+330*(.5+.5*Math.sin(a/21000+.6));fords=[-55000,42000,120000];shallow=45;}
+ else if(i===1){c=-60000+14000*Math.sin(a/42000+.7)+5000*Math.sin(a/19000);half=700+300*(.5+.5*Math.sin(a/21000));depth=70+160*(.5+.5*Math.sin(a/14000));fords=[-95000,30000];shallow=35;}
+ else{c=100000+10000*Math.sin(a/31000);half=900+450*(.5+.5*Math.sin(a/24000));depth=90+190*(.5+.5*Math.sin(a/17000));fords=[-25000,95000];shallow=40;}
+ for(const f of fords){let t=1-w4s(900,3500,Math.abs(a-f));depth=depth*(1-t)+shallow*t;}return {distance:Math.abs((i<2?x:y)-c),half,depth,centre:c};
+}
+export function worldFourHeight(x,y){const d=Math.max(Math.abs(x),Math.abs(y)),a=Math.atan2(y,x),q=w4s(6000,16000,Math.hypot(x,y));let h=q*(600*Math.sin(x/18000)*Math.cos(y/23000)+220*Math.sin(x/4500)*Math.cos(y/5500)+110*Math.sin((x+y)/3200));h+=w4s(145000,173000,d)*(1400+550*Math.sin(a*7)+350*Math.sin(a*19))+22000*w4s(174000,184000,d)+13000*w4s(184000,199000,d)+w4s(165000,195000,d)*(1700+1300*Math.sin(a*13+Math.sin(a*5)));const targets=[];for(let i=0;i<3;i++){let r=worldFourRiver(i,x,y);if(!r||r.distance>r.half+3200)continue;let w=-1300+y*.0015+40*Math.sin(y/80000);targets.push(r.distance<=r.half?w-r.depth*(1-(r.distance/r.half)**4):w+(h-w)*w4s(r.half,r.half+3200,r.distance));}return targets.length?Math.min(...targets):h;}
