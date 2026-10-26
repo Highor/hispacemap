@@ -56,27 +56,36 @@ button,input{font:inherit;color:inherit;background:#0d2635;border:1px solid #3c6
   const seed=input.value.trim().toUpperCase(), match=/^HS[12]-([1-9][0-9]{0,9})$/.exec(seed);
   if(!match || Number(match[1])>2147483647){status.textContent='Use HS1- or HS2- followed by a number from 1 to 2147483647.';return;}
   generate.disabled=true;status.textContent='Generating your world…';
-  try{await new Promise(requestAnimationFrame);displayMap(generateWorld(seed,assetFor(seed)));const url=new URL(location.href);url.search='';url.searchParams.set('seedid',seed);history.replaceState(null,'',url);}catch(error){status.textContent=error.message;}finally{generate.disabled=false;}
+  try{await new Promise(requestAnimationFrame);displayMap(generateWorld(seed,assetFor(seed)));syncUrl();}catch(error){status.textContent=error.message;}finally{generate.disabled=false;}
  };
  input.addEventListener('keydown',event=>{if(event.key==='Enter')generate.click();});
  const names={'Base':'Main capsule','Player':'Starting position','Cache 1':'Solar cache','Cache 2':'Repair cache','Cache 3':'Power cache','Suit pod':'Spacesuit pod','Research':'Research capsule','Mining cache':'Mining cache','Future impact':'Future impact','Impact site':'Impact site','Tunnel 1':'Pass · west','Tunnel 2':'Pass · east','Enemy':'Enemy','Narrow pass':'Mountain pass','Danger sign':'DANGER sign','Skeleton':'Skeleton','Crash module':'Crashed module','Module chest':'Module chest','Module record':'Module record'};
  const groups=[['Enemies','var(--red)','Enemy'],['Locations','var(--foreground)',null],['Dungeons','var(--purple)','Dungeons'],['Iron','var(--viz-series-1)','Iron'],['Bronze','var(--viz-series-2)','Bronze'],['Glass','var(--viz-series-3)','Glass'],['Hydrite','var(--viz-series-4)','Hydrite'],['Verdite','var(--viz-series-5)','Verdite'],['Vitraleaf','var(--green)','Vitraleaf'],['Asterium','var(--purple)','Asterium'],['Vesperite','var(--yellow)','Vesperite'],['Sulphrite','#e7e63b','Sulphrite'],['Cobaltite','#3889ff','Cobaltite'],['Pyronite','#ee762e','Pyronite'],['Crythium','#62e6bb','Crythium']];
- const enabledKinds=new Set();
+ const bookmarkParams=new URLSearchParams(location.search);
+ const bookmarkedFilters=new Set((bookmarkParams.get('filters')||'').split(',').map(x=>x.toLowerCase()));
+ const enabledKinds=new Set(groups.filter(([label])=>bookmarkedFilters.has(label.toLowerCase())).map(([, ,kind])=>kind||'Locations'));
  const dungeonKinds=new Set(['The Hollow Foundry','The Sable Crucible','The Obsidian Vault','The Final Bastion / Launch Control']);
  const groupFor=p=>dungeonKinds.has(p.kind)?'Dungeons':p.kind==='Flying enemy'?'Enemy':groups.find(g=>g[2]===p.kind)?.[2]||'Locations';
  const isVisible=p=>(worldFourView?p.x>17000:p.x<17000)&&!['Skeleton','Danger sign'].includes(p.kind)&&(p.kind==='Base'||enabledKinds.has(groupFor(p)));
  for(const [label,color,kind] of groups){
   const e=document.createElement('label');e.className='hp-filter text-small';
-  const checkbox=document.createElement('input');checkbox.type='checkbox';checkbox.checked=false;
+  const checkbox=document.createElement('input');checkbox.type='checkbox';checkbox.checked=enabledKinds.has(kind||'Locations');
   const key=kind||'Locations';checkbox.setAttribute('aria-label',label);
-  checkbox.addEventListener('change',()=>{if(checkbox.checked)enabledKinds.add(key);else enabledKinds.delete(key);if(selected&&!isVisible(selected)){selected=null;root.querySelector('.hp-detail').textContent=data.snapshot;}draw();});
+  checkbox.addEventListener('change',()=>{if(checkbox.checked)enabledKinds.add(key);else enabledKinds.delete(key);if(selected&&!isVisible(selected)){selected=null;root.querySelector('.hp-detail').textContent=data.snapshot;}draw();syncUrl();});
   const dot=document.createElement('i');dot.style.setProperty('--mark',color);
   if(['Iron','Bronze','Asterium','Vesperite','Sulphrite','Cobaltite','Pyronite','Crythium'].includes(kind))dot.style.borderRadius='0';
   if(kind==='Glass'){dot.style.borderRadius='0';dot.style.transform='rotate(45deg)';}
   if(key==='Locations'||key==='Dungeons')dot.style.clipPath='polygon(50% 0,100% 100%,0 100%)';
   e.append(checkbox,dot,document.createTextNode(label));root.querySelector('.hp-legend').append(e);
  }
- let worldFourView=false;let cx=4000,cy=0,half=6800,w=700,h=590,selected=null,drag=null,moved=false;
+ let worldFourView=bookmarkParams.get('world')==='4';let cx=worldFourView?20000:4000,cy=0,half=worldFourView?2400:6800,w=700,h=590,selected=null,drag=null,moved=false;
+ function syncUrl(){
+  const url=new URL(location.href);url.searchParams.delete('seed');
+  if(data.worldSeed)url.searchParams.set('seedid',`HS${data.worldGeneratorVersion}-${data.worldSeed}`);
+  url.searchParams.set('world',worldFourView?'4':'1-3');
+  url.searchParams.set('filters',groups.filter(([, ,kind])=>enabledKinds.has(kind||'Locations')).map(([label])=>label.toLowerCase()).join(','));
+  history.replaceState(null,'',url);
+ }
  const make=(tag,attrs,parent=svg)=>{const n=document.createElementNS(ns,tag);for(const k in attrs)n.setAttribute(k,attrs[k]);parent.append(n);return n};
  const mx=x=>x;
  const mapPoints=()=>worldFourView?data.points.concat(data.worldFour?.fauna||[]):data.points;
@@ -129,15 +138,15 @@ button,input{font:inherit;color:inherit;background:#0d2635;border:1px solid #3c6
  if(selected){make('circle',{cx:sx(mx(selected.x)),cy:sy(selected.y),r:12,fill:'none',stroke:'var(--foreground)','stroke-width':2},field);}
  make('rect',{x:L,y:T,width:R-L,height:B-T,fill:'none',stroke:'var(--border)'});
  }
- root.querySelector('.hp-greenworld').onclick=()=>{worldFourView=true;cx=20000;cy=0;half=2400;selected=null;draw();};
- root.querySelector('.hp-homeworlds').onclick=()=>{worldFourView=false;cx=4000;cy=0;half=6800;selected=null;draw();};
+ root.querySelector('.hp-greenworld').onclick=()=>{worldFourView=true;cx=20000;cy=0;half=2400;selected=null;draw();syncUrl();};
+ root.querySelector('.hp-homeworlds').onclick=()=>{worldFourView=false;cx=4000;cy=0;half=6800;selected=null;draw();syncUrl();};
  const zoom=(factor)=>{half=Math.max(65,Math.min(worldFourView?3000:6800,half*factor));draw();};
  root.querySelector('.hp-in').onclick=()=>zoom(.5);root.querySelector('.hp-out').onclick=()=>zoom(2);
  svg.addEventListener('wheel',e=>{e.preventDefault();zoom(e.deltaY>0?1.2:1/1.2);},{passive:false});
  svg.addEventListener('pointerdown',e=>{drag={x:e.clientX,y:e.clientY,cx,cy};moved=false;svg.setPointerCapture(e.pointerId);});
  svg.addEventListener('pointermove',e=>{if(!drag)return;const rect=svg.getBoundingClientRect(),dx=(e.clientX-drag.x)*w/rect.width,dy=(e.clientY-drag.y)*h/rect.height;if(Math.hypot(dx,dy)>4)moved=true;if(moved){cx=drag.cx-dx/scale;cy=drag.cy-dy/scale;draw();}});
  svg.addEventListener('pointerup',e=>{drag=null;if(moved)return;const rect=svg.getBoundingClientRect(),px=(e.clientX-rect.left)*w/rect.width,py=(e.clientY-rect.top)*h/rect.height;let best=null,dist=24;for(const p of mapPoints().filter(isVisible)){const d=Math.hypot(sx(mx(p.x))-px,sy(p.y)-py);if(d<dist){best=p;dist=d;}}if(best){selected=best;const state=['Enemy','Flying enemy'].includes(best.kind)?`${best.remaining} HP`:(best.remaining?'Available':'Empty / collected');root.querySelector('.hp-detail').textContent=`${best.species||best.species||names[best.kind]||best.kind} · E ${Math.round(best.x-(worldFourView?20000:0))} m / N ${Math.round(-best.y)} m · ${state}`;draw();}});
- svg.addEventListener('pointercancel',()=>{drag=null;});new ResizeObserver(draw).observe(root);draw();
+ svg.addEventListener('pointercancel',()=>{drag=null;});new ResizeObserver(draw).observe(root);draw();syncUrl();
  })().catch(error=>{document.querySelector('.hp-seed-status').textContent=error.message;});
  </script>
 </div>
