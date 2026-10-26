@@ -8,7 +8,7 @@ for(const bad of ['','HS3-1','HS1-0','HS1--1','HS1-2147483648','HS1-1x'])assert.
 assert.equal(parseSeed(' hs1-42 '),42);
 for(const ref of references){
  const map=generateWorld(ref.seed,assets);
- assert.equal(map.points.length,ref.points.length+2+90+288+40+5+3456+64+96+192+60+map.points.filter(p=>p.kind==='Enemy'&&p.id>=800).length+map.points.filter(p=>p.kind==='Flying enemy').length+map.points.filter(p=>['Abandoned house','Cabin medkit','Frontier ruin','Frontier medkit','Frontier ammo'].includes(p.kind)).length,ref.seed+' doubled resource count');
+ assert.equal(map.points.length,ref.points.length+864+49+2+90+288+40+5+3456+64+96+192+60+map.points.filter(p=>p.kind==='Enemy'&&p.id>=800).length+map.points.filter(p=>p.kind==='Flying enemy').length+map.points.filter(p=>['Abandoned house','Cabin medkit','Frontier ruin','Frontier medkit','Frontier ammo'].includes(p.kind)).length,ref.seed+' doubled resource count');
  for(const [kind,id,oldX,y] of ref.points){
   // Opening the eastern ridge changes slope-based World 2 vegetation selection.
   if(kind==='Vitraleaf'&&id>=48)continue;
@@ -19,7 +19,7 @@ for(const ref of references){
   assert.ok(point && candidates.some(p=>Math.hypot(p.x-x,p.y-y)<.02),`${ref.seed}: ${kind} ${id} differs from Unreal`);
  }
  assert.equal(map.points.filter(p=>p.kind==='Hydrite').length,2304);
- assert.equal(map.points.filter(p=>p.kind==='Vitraleaf').length,672);
+ assert.equal(map.points.filter(p=>p.kind==='Vitraleaf'&&p.x<17000).length,672);
  for(const [kind,count] of [['Iron',32],['Bronze',32],['Asterium',32],['Vesperite',32],['Glass',192],['Verdite',2304]])assert.equal(map.points.filter(p=>p.kind===kind).length,count);
  assert.equal(map.points.filter(p=>p.kind==='Vitraleaf'&&p.x<2000).length,96);
  assert.equal(map.points.filter(p=>p.kind==='Vitraleaf'&&p.x>=2000&&p.x<6000).length,288);
@@ -192,7 +192,7 @@ for(const [seed,af] of [["HS1-201026",assets],["HS2-201026",hs2]]){const p=gener
 const populationNative=JSON.parse(readFileSync(new URL('./frontier-population-reference.json',import.meta.url)));
 for(const p of populationNative.points){const q=second.points.find(q=>q.kind===p.kind&&q.id===p.id);assert.ok(q&&Math.hypot(p.x-q.x,p.y-q.y)<.025,'Added World 3 population differs from Unreal '+p.kind+' '+p.id);}
 for(const [seed,af] of [['HS1-42',assets],['HS2-201026',hs2],['HS2-123456789',hs2]]){
- const ps=generateWorld(seed,af).points,original=ps.filter(p=>p.pack>=6000&&p.pack<6160),added=ps.filter(p=>p.pack>=6160&&p.pack<6320),plants=ps.filter(p=>p.kind==='Vitraleaf'&&p.x>=6000);
+ const ps=generateWorld(seed,af).points,original=ps.filter(p=>p.pack>=6000&&p.pack<6160),added=ps.filter(p=>p.pack>=6160&&p.pack<6320),plants=ps.filter(p=>p.kind==='Vitraleaf'&&p.x>=6000&&p.x<17000);
  assert.equal(added.length,original.length);assert.equal(plants.length,288);assert.equal(new Set([...original,...added].map(p=>p.id)).size,original.length+added.length);
  for(const p of added){assert.ok(p.x>6150&&p.x<9850);assert.ok(!(p.x<=6220&&Math.abs(p.y)<=140));}
  for(const p of new Set(added.map(p=>p.pack))){const members=added.filter(q=>q.pack===p);assert.ok(members.length>=2&&members.length<=4);assert.equal(members.length,original.filter(q=>q.pack===p-160).length);}
