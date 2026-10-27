@@ -8,7 +8,7 @@ for(const bad of ['','HS3-1','HS1-0','HS1--1','HS1-2147483648','HS1-1x'])assert.
 assert.equal(parseSeed(' hs1-42 '),42);
 for(const ref of references){
  const map=generateWorld(ref.seed,assets);
- assert.equal(map.points.length,ref.points.length+864+49+2+90+288+40+5+3456+64+96+192+60+map.points.filter(p=>p.kind==='Enemy'&&p.id>=800).length+map.points.filter(p=>p.kind==='Flying enemy').length+map.points.filter(p=>['Abandoned house','Cabin medkit','Frontier ruin','Frontier medkit','Frontier ammo'].includes(p.kind)).length,ref.seed+' doubled resource count');
+ assert.equal(map.points.length,ref.points.length+24+864+49+2+90+288+40+5+3456+64+96+192+60+map.points.filter(p=>p.kind==='Enemy'&&p.id>=800).length+map.points.filter(p=>p.kind==='Flying enemy').length+map.points.filter(p=>['Abandoned house','Cabin medkit','Frontier ruin','Frontier medkit','Frontier ammo'].includes(p.kind)).length,ref.seed+' doubled resource count');
  for(const [kind,id,oldX,y] of ref.points){
   // Opening the eastern ridge changes slope-based World 2 vegetation selection.
   if(kind==='Vitraleaf'&&id>=48)continue;
@@ -226,3 +226,7 @@ for(const [seed,asset] of [['HS1-1',assets],['HS2-123456789',JSON.parse(readFile
 console.log('All 90 pools match native placement; thirty per world with large lakes and non-overlapping resource/enemy clearance.');
 
 const green=generateWorld("HS2-42",JSON.parse(readFileSync(new URL("../assets/world-hs2.json",import.meta.url))));assert.equal(green.worldFour.diameter,4000);assert.equal(green.points.filter(p=>p.kind==="World 4 recovery cache").length,1);assert.equal(green.points.filter(p=>p.kind==="World 4 crash").length,1);assert.equal(green.worldFour.terrain.length,1089);
+
+const safeHouseReference=JSON.parse(readFileSync(new URL('./safe-houses-reference.json',import.meta.url)));
+for(const version of [1,2]){const a=JSON.parse(readFileSync(new URL(`../assets/world-hs${version}.json`,import.meta.url)));const map=generateWorld(`HS${version}-123456789`,a);const houses=map.points.filter(p=>p.kind==='World 4 safe house');assert.equal(houses.length,24);for(const expected of safeHouseReference){const actual=houses.find(p=>p.id===expected.id);assert.ok(actual&&Math.hypot(actual.x-expected.x,actual.y-expected.y,actual.z-expected.z)<.001,'Safe house native coordinate agreement');}assert.ok(houses.some(p=>p.y<-1000)&&houses.some(p=>p.y>1000)&&houses.some(p=>p.x<19000)&&houses.some(p=>p.x>21000));}
+console.log('All 24 World 4 safe houses match native sites in HS1 and HS2 across the full planet.');
