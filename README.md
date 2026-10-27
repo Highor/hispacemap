@@ -61,3 +61,9 @@ HS2 retains the HS1 random streams and Worlds 1/2, and adds World 3 interior hil
 Toxic pools: thirty per world (ninety total), preserving the original six and appending mixed-size basins on independent streams. Water can reach about forty metres across where terrain and resource/enemy clearance allow it. The density fixture compares every native position, radius, exit heading and colour. The generator uses spatial buckets for the denser search.
 
 World 4 relief: the Skyward supply drop appears under Locations at E +1200 m. Forty-eight Amberheart Pod sites occupy the outer forest ring and have their own bookmarkable filter. The public map shows initial sites, independently of saved collection and the in-game five-minute signal delay. Environment sample heights were refreshed from the shared terrain helper after the nine-river extension.
+
+## Responsive startup
+
+The spoiler gate does not fetch terrain or start generation. Accepting it immediately reveals the page and a loading status. `map-loader.js` starts one module worker on demand; `map-worker.js` loads and caches only the requested HS1/HS2 terrain, validates seeds before downloading, and runs the unchanged native-reference generator off the UI thread. Later generation uses the same worker. Existing session acceptance, seedid/world/filter bookmarks and generate-only controls remain. `npm test` includes actual worker integration for lazy version loading, invalid seeds, reply IDs and cache reuse.
+
+The local preview serves these same modules. The game project's `Tools/world_seed_map.py` embeds the same worker, public terrain and UI into the standalone HTML, using an inert worker payload until consent. `Tools/build_public_map.py` refreshes standalone/branding assets from this canonical website; it no longer overwrites the live UI from the historical fragment.
