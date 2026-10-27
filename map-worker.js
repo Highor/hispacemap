@@ -1,4 +1,4 @@
-import {generateWorld,parseSeed} from './generator.js?v=world-four-rivers-1';
+import {generateWorld,parseSeed} from './generator.js?v=readable-text-1';
 const assets=new Map();
 const loadAsset=version=>{
  if(!assets.has(version))assets.set(version,fetch(new URL(`./assets/world-hs${version}.json?v=world-four-rivers-1`,import.meta.url)).then(response=>{if(!response.ok)throw new Error('Terrain could not be loaded. Please try again.');return response.json();}).catch(error=>{assets.delete(version);throw error;}));

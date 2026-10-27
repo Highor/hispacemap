@@ -272,7 +272,7 @@ export function generateWorld(seedText,asset){
    if(!centre)throw Error('Could not place expanded toxic pool '+world+':'+i);toxicPools.push(centre);points.push({kind:'Toxic pool',id:toxicPools.length-1,x:centre.x/100,y:centre.y/100,z:centre.z/100,radius:centre.radius/100,yaw:centre.yaw,deep:centre.deep,yellow:centre.yellow,remaining:1});
   }
  }
- const {collision,...base}=asset;return {...base,points,villageRoute:{houses:routeHouses,keys:routeKeys},worldSeed:seed,worldGeneratorVersion:version,seedId:`HS${version}-${seed}`,mapMode:'initial-world',snapshot:`Initial world Â· HS${version}-${seed} Â· no saved progress`};
+ const {collision,...base}=asset;return {...base,points,villageRoute:{houses:routeHouses,keys:routeKeys},worldSeed:seed,worldGeneratorVersion:version,seedId:`HS${version}-${seed}`,mapMode:'initial-world',snapshot:`Initial world \u00b7 HS${version}-${seed} \u00b7 no saved progress`};
 }
 
 const w4s=(a,b,x)=>{let t=Math.max(0,Math.min(1,(x-a)/(b-a)));return t*t*(3-2*t);};
